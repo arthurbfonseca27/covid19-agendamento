@@ -4,7 +4,7 @@ import { FaSearch } from "react-icons/fa";
 import Logo from "../assets/Logo.svg";
 import { Button, ButtonGroup } from "@chakra-ui/react";
 
-const Welcome = () => {
+const Home = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <div className="flex items-center justify-center">
@@ -22,4 +22,4 @@ const Welcome = () => {
   );
 };
 
-export default Welcome;
+export default Home;
