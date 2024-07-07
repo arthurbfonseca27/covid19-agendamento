@@ -6,6 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Button, ButtonGroup } from "@chakra-ui/react";
 import { Progress } from "@chakra-ui/react";
 import styled from "styled-components";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface FormValues {
   nome: string;
@@ -14,6 +15,7 @@ interface FormValues {
 }
 
 const AgendamentoInicial = () => {
+  console.log("clicouu")
   const handleSubmit = (values: FormValues) => {
     console.log(values);
   };
@@ -98,6 +100,12 @@ const AgendamentoInicial = () => {
                       selected={field.value}
                       dateFormat="dd/MM/yyyy"
                       placeholderText="dd/mm/aaaa"
+                      showYearDropdown
+                      closeOnScroll={true}
+                      peekNextMonth
+                      showMonthDropdown
+                      dropdownMode="select"
+                      scrollableYearDropdown
                       onChange={(date: Date) =>
                         form.setFieldValue("dataNascimento", date)
                       }
@@ -116,7 +124,11 @@ const AgendamentoInicial = () => {
                 >
                   Cancelar
                 </Button>
-                <Button size="lg" colorScheme="primary">
+                <Button
+                  size="lg"
+                  colorScheme="primary"
+                  type="submit"
+                >
                   Continuar
                 </Button>
               </div>
