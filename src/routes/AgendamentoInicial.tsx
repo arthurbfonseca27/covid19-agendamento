@@ -8,6 +8,7 @@ import { Progress } from "@chakra-ui/react";
 import styled from "styled-components";
 import { useDispatch } from "react-redux";
 import { setNome, setSobrenome, setDataNascimento } from "../redux/pessoaSlice";
+import { Link } from "react-router-dom";
 import "react-datepicker/dist/react-datepicker.css";
 
 interface FormValues {
@@ -64,6 +65,7 @@ const AgendamentoInicial = () => {
           <div className="px-5"></div>
           <Progress
             value={50}
+            hasStripe
             colorScheme="primary"
             className="w-full rounded-3xl"
           />
@@ -160,11 +162,14 @@ const AgendamentoInicial = () => {
                     variant="outline"
                     border="2px"
                     size="lg"
+                    fontWeight='normal'
                     colorScheme="primary"
                   >
-                    Cancelar
+                    <nav>
+                      <Link to="/">Cancelar</Link>
+                    </nav>
                   </Button>
-                  <Button size="lg" colorScheme="primary" type="submit">
+                  <Button size="lg" colorScheme="primary" type="submit" fontWeight='normal'>
                     Continuar
                   </Button>
                 </div>
