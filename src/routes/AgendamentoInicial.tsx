@@ -10,7 +10,20 @@ import { useDispatch } from "react-redux";
 import { setNome, setSobrenome, setDataNascimento } from "../redux/pessoaSlice";
 import { Link } from "react-router-dom";
 import "react-datepicker/dist/react-datepicker.css";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import { Box } from "@chakra-ui/react";
+import {
+  Step,
+  StepDescription,
+  StepIcon,
+  StepIndicator,
+  StepNumber,
+  StepSeparator,
+  StepStatus,
+  StepTitle,
+  Stepper,
+  useSteps,
+} from "@chakra-ui/react";
 
 interface FormValues {
   nome: string;
@@ -45,7 +58,7 @@ const AgendamentoInicial = () => {
     if (values.dataNascimento) {
       dispatch(setDataNascimento(values.dataNascimento.toLocaleDateString()));
     }
-    navigate('/AgendamentoFinal');
+    navigate("/AgendamentoFinal");
   };
 
   const ErrorStyled = styled.span`
@@ -53,24 +66,48 @@ const AgendamentoInicial = () => {
     font-size: 14px;
   `;
 
+  const steps = [
+    { title: "Primeiro passo", description: "Informações pessoais" },
+    { title: "Segundo passo", description: "Data & Horário" },
+  ];
+
+  const { activeStep } = useSteps({
+    index: 0,
+    count: steps.length,
+  });
+
+
   return (
     <div className="bg-[#F9F9FC] min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center justify-center w-1/2 h-1/2 bg-[#FFFFFF] py-8 rounded-3xl border border-[#DDE2E5]">
         <p className="flex pl-10 justify-start items-start text-2xl w-full pb-4 pt-1">
           Agende seu horário
         </p>
-        <div className="flex flex-row gap-1 text-sm pb-4 justify-end items-end w-full px-10">
-          <p className="text-[#5570F1]">Passo 1</p>
-          <p className="text-[#83898C]">de 2</p>
+        <div className="flex flex-row gap-1 text-sm pb-9 justify-end items-end w-full px-10">
+          
         </div>
         <div className="flex flex-row w-full pb-10">
           <div className="px-5"></div>
-          <Progress
-            value={50}
-            hasStripe
-            colorScheme="primary"
-            className="w-full rounded-3xl"
-          />
+          <Stepper index={activeStep} colorScheme="primary" className="w-full">
+            {steps.map((step, index) => (
+              <Step key={index}>
+                <StepIndicator>
+                  <StepStatus
+                    complete={<StepIcon />}
+                    incomplete={<StepNumber />}
+                    active={<StepNumber />}
+                  />
+                </StepIndicator>
+
+                <Box>
+                  <StepTitle>{step.title}</StepTitle>
+                  <StepDescription>{step.description}</StepDescription>
+                </Box>
+
+                <StepSeparator />
+              </Step>
+            ))}
+          </Stepper>
           <div className="px-5"></div>
         </div>
 
@@ -141,7 +178,7 @@ const AgendamentoInicial = () => {
                         dateFormat="dd/MM/yyyy"
                         placeholderText="dd/mm/aaaa"
                         showYearDropdown
-                        locale="pt-br" 
+                        locale="pt-br"
                         closeOnScroll={true}
                         peekNextMonth
                         showMonthDropdown
@@ -165,16 +202,23 @@ const AgendamentoInicial = () => {
                     variant="outline"
                     border="2px"
                     size="lg"
-                    fontWeight='normal'
+                    fontWeight="normal"
                     colorScheme="primary"
                     width="180px"
-                    borderRadius='12px'
+                    borderRadius="12px"
                   >
                     <nav>
                       <Link to="/">Cancelar</Link>
                     </nav>
                   </Button>
-                  <Button size="lg" colorScheme="primary" type="submit" fontWeight='normal' width="180px" borderRadius='12px'>
+                  <Button
+                    size="lg"
+                    colorScheme="primary"
+                    type="submit"
+                    fontWeight="normal"
+                    width="180px"
+                    borderRadius="12px"
+                  >
                     Continuar
                   </Button>
                 </div>

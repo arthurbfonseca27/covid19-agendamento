@@ -14,6 +14,8 @@ import { useDisclosure } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import ptBR from "date-fns/locale/pt-BR";
 import { IoArrowBackOutline } from "react-icons/io5";
+import { Box } from "@chakra-ui/react";
+import { FaCheckCircle } from "react-icons/fa";
 import {
   Drawer,
   DrawerBody,
@@ -23,6 +25,19 @@ import {
   DrawerContent,
   DrawerCloseButton,
 } from "@chakra-ui/react";
+import {
+  Step,
+  StepDescription,
+  StepIcon,
+  StepIndicator,
+  StepNumber,
+  StepSeparator,
+  StepStatus,
+  StepTitle,
+  Stepper,
+  useSteps,
+} from "@chakra-ui/react";
+import useModal from "../hooks/useModal";
 
 interface FormValues {
   dataAgendamento: Date | null;
@@ -51,11 +66,13 @@ const AgendamentoFinal = () => {
   const navigate = useNavigate();
 
   const handleSubmit = (values: FormValues) => {
-    console.log("sexo sexo");
+    setActiveStep(2);
     dispatch(setHorario(values.horario));
     if (values.dataAgendamento) {
       dispatch(setDataAgendamento(values.dataAgendamento.toLocaleDateString()));
     }
+    handlerShowModal(); 
+
     navigate("/");
   };
 
@@ -66,41 +83,63 @@ const AgendamentoFinal = () => {
     font-size: 14px;
   `;
 
+  const { showModal } = useModal();
+
+  const handlerShowModal = () => {
+    showModal({
+      title: "Agendamento realizado com sucesso!",
+      description:
+        "Você foi direcionado para a página inicial da plataforma e poderá consultar seu agendamento.",
+      confirmText: "Entendido!",
+      icon: <FaCheckCircle size={48} color="#10FE0C" />,
+    });
+  };
+
   const [selectedTime, setSelectedTime] = useState<string>("");
   const times = Array.from(
     { length: 11 },
     (_, i) => `${String(i + 8).padStart(2, "0")}:00`
   );
 
+  const steps = [
+    { title: "Primeiro passo", description: "Informações pessoais" },
+    { title: "Segundo passo", description: "Data & Horário" },
+  ];
+
+  const { activeStep, setActiveStep } = useSteps({
+    index: 1,
+    count: steps.length,
+  });
+
   return (
     <div className="bg-[#F9F9FC] min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center justify-center w-1/2 h-1/2 bg-[#FFFFFF] py-8 rounded-3xl border border-[#DDE2E5]">
         <div className="flex flex-col pl-10 gap-8 justify-start items-start text-2xl w-full pb-4 pt-1">
-          <Button
-            variant="outline"
-            border="2px"
-            aria-label="Back"
-            colorScheme="primary"
-            leftIcon={<IoArrowBackOutline />}
-          >
-            <nav>
-              <Link to="/AgendamentoInicial">Voltar</Link>
-            </nav>
-          </Button>
-          <p className="text-2xl w-full  ">Agende seu horário</p>
+          <p className="text-2xl w-full pb-11">Agende seu horário</p>
         </div>
-        <div className="flex flex-row gap-1 text-sm pb-4 justify-end items-end w-full px-10">
-          <p className="text-[#5570F1]">Passo 2</p>
-          <p className="text-[#83898C]">de 2</p>
-        </div>
+        <div className="flex flex-row gap-1 text-sm justify-end items-end w-full px-10"></div>
         <div className="flex flex-row w-full pb-10">
-          <div className="px-5"></div>
-          <Progress
-            value={100}
-            hasStripe
-            colorScheme="primary"
-            className="w-full rounded-3xl"
-          />
+          <div className="px-5 "></div>
+          <Stepper index={activeStep} colorScheme="primary" className="w-full">
+            {steps.map((step, index) => (
+              <Step key={index}>
+                <StepIndicator>
+                  <StepStatus
+                    complete={<StepIcon />}
+                    incomplete={<StepNumber />}
+                    active={<StepNumber />}
+                  />
+                </StepIndicator>
+
+                <Box>
+                  <StepTitle>{step.title}</StepTitle>
+                  <StepDescription>{step.description}</StepDescription>
+                </Box>
+
+                <StepSeparator />
+              </Step>
+            ))}
+          </Stepper>
           <div className="px-5"></div>
         </div>
         <Formik
@@ -196,7 +235,7 @@ const AgendamentoFinal = () => {
                         {times.map((time, index) => (
                           <Button
                             key={index}
-                            width="200px"
+                            width="full"
                             colorScheme={
                               time === selectedTime ? "primary" : "gray"
                             }
