@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import { setNome, setSobrenome, setDataNascimento } from "../redux/pessoaSlice";
 import { Link } from "react-router-dom";
 import "react-datepicker/dist/react-datepicker.css";
+import { useNavigate } from 'react-router-dom';
 
 interface FormValues {
   nome: string;
@@ -36,14 +37,15 @@ const AgendamentoInicial = () => {
   }, [formValues]);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleSubmit = (values: FormValues) => {
-    console.log(values);
     dispatch(setNome(values.nome));
     dispatch(setSobrenome(values.sobrenome));
     if (values.dataNascimento) {
       dispatch(setDataNascimento(values.dataNascimento.toLocaleDateString()));
     }
+    navigate('/AgendamentoFinal');
   };
 
   const ErrorStyled = styled.span`
@@ -54,7 +56,7 @@ const AgendamentoInicial = () => {
   return (
     <div className="bg-[#F9F9FC] min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center justify-center w-1/2 h-1/2 bg-[#FFFFFF] py-8 rounded-3xl border border-[#DDE2E5]">
-        <p className="flex pl-10 justify-start items-start text-2xl w-full pb-10 pt-1">
+        <p className="flex pl-10 justify-start items-start text-2xl w-full pb-4 pt-1">
           Agende seu horário
         </p>
         <div className="flex flex-row gap-1 text-sm pb-4 justify-end items-end w-full px-10">
@@ -94,7 +96,7 @@ const AgendamentoInicial = () => {
                         nome: e.target.value,
                       }));
                     }}
-                    placeholder="Fulano"
+                    placeholder="Nome"
                     className="rounded-lg px-4 py-3 bg-[#EFF1F9] w-full focus:outline-none focus:none focus:none focus:border-transparent"
                     required
                   />
@@ -117,7 +119,7 @@ const AgendamentoInicial = () => {
                         sobrenome: e.target.value,
                       }));
                     }}
-                    placeholder="Da Silva"
+                    placeholder="Sobrenome"
                     className="rounded-lg py-3 px-4 bg-[#EFF1F9] focus:outline-none focus:none focus:none focus:border-transparent"
                     required
                   />
@@ -139,6 +141,7 @@ const AgendamentoInicial = () => {
                         dateFormat="dd/MM/yyyy"
                         placeholderText="dd/mm/aaaa"
                         showYearDropdown
+                        locale="pt-br" 
                         closeOnScroll={true}
                         peekNextMonth
                         showMonthDropdown
@@ -164,12 +167,14 @@ const AgendamentoInicial = () => {
                     size="lg"
                     fontWeight='normal'
                     colorScheme="primary"
+                    width="180px"
+                    borderRadius='12px'
                   >
                     <nav>
                       <Link to="/">Cancelar</Link>
                     </nav>
                   </Button>
-                  <Button size="lg" colorScheme="primary" type="submit" fontWeight='normal'>
+                  <Button size="lg" colorScheme="primary" type="submit" fontWeight='normal' width="180px" borderRadius='12px'>
                     Continuar
                   </Button>
                 </div>

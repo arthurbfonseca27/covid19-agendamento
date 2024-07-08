@@ -4,12 +4,16 @@ interface PessoaState {
   nome: string;
   sobrenome: string;
   dataNascimento: string | null; // Alterado para string conforme sua necessidade
+  dataAgendamento: string | null;
+  horario: string;
 }
 
 const initialState: PessoaState = {
   nome: "",
   sobrenome: "",
   dataNascimento: null,
+  dataAgendamento: null,
+  horario: "",
 };
 
 export const slice = createSlice({
@@ -25,9 +29,15 @@ export const slice = createSlice({
     setDataNascimento(state, action: PayloadAction<string | null>) {
       state.dataNascimento = action.payload;
     },
+    setDataAgendamento(state, action: PayloadAction<string | null>) {
+      state.dataAgendamento = action.payload;
+    },
+    setHorario(state, action: PayloadAction<string>) {
+      state.horario = action.payload;
+    },
   },
 });
 
-export const { setNome, setSobrenome, setDataNascimento } = slice.actions;
+export const { setNome, setSobrenome, setDataNascimento, setDataAgendamento, setHorario } = slice.actions;
 
 export default slice.reducer;

@@ -1,5 +1,5 @@
 import React from "react";
-import { SiGoogleforms } from "react-icons/si";
+import { LiaClipboardListSolid } from "react-icons/lia";
 import { FaSearch } from "react-icons/fa";
 import Logo from "../assets/Logo.svg";
 import { Button, ButtonGroup } from "@chakra-ui/react";
@@ -12,12 +12,12 @@ const Home = () => {
         <img src={Logo} alt="Logo da plataforma"></img>
       </div>
       <div className="flex flex-row gap-8 justify-center items-center">
-        <Button rightIcon={<SiGoogleforms />} size="lg" colorScheme="primary" fontWeight='normal'>
+        <Button leftIcon={<LiaClipboardListSolid size={20  }/>} size="lg" colorScheme="primary" fontWeight='normal'  width="180px">
           <nav>
             <Link to="/AgendamentoInicial">Agendar</Link>
           </nav>
         </Button>
-        <Button rightIcon={<FaSearch />} size="lg" colorScheme="primary" fontWeight='normal'>
+        <Button leftIcon={<FaSearch />} size="lg" colorScheme="primary" fontWeight='normal'  width="180px">
           Consultar
         </Button>
       </div>
