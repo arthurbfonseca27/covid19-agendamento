@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Formik, Form, Field, ErrorMessage, useField } from "formik";
 import { AgendamentoInicialSchema } from "../validation/AgendamentoInicial";
 import DatePicker from "react-datepicker";
@@ -6,6 +6,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Button, ButtonGroup } from "@chakra-ui/react";
 import { Progress } from "@chakra-ui/react";
 import styled from "styled-components";
+import { useDispatch } from "react-redux";
+import { setNome, setSobrenome, setDataNascimento } from "../redux/pessoaSlice";
 import "react-datepicker/dist/react-datepicker.css";
 
 interface FormValues {
@@ -15,9 +17,32 @@ interface FormValues {
 }
 
 const AgendamentoInicial = () => {
-  console.log("clicouu")
+  const [formValues, setFormValues] = useState<FormValues>(() => {
+    const data = localStorage.getItem("formValues");
+    if (data) {
+      const storedValues = JSON.parse(data) as FormValues;
+      storedValues.dataNascimento = storedValues.dataNascimento
+        ? new Date(storedValues.dataNascimento)
+        : null;
+      return storedValues;
+    } else {
+      return { nome: "", sobrenome: "", dataNascimento: null };
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("formValues", JSON.stringify(formValues));
+  }, [formValues]);
+
+  const dispatch = useDispatch();
+
   const handleSubmit = (values: FormValues) => {
     console.log(values);
+    dispatch(setNome(values.nome));
+    dispatch(setSobrenome(values.sobrenome));
+    if (values.dataNascimento) {
+      dispatch(setDataNascimento(values.dataNascimento.toLocaleDateString()));
+    }
   };
 
   const ErrorStyled = styled.span`
@@ -46,94 +71,106 @@ const AgendamentoInicial = () => {
         </div>
 
         <Formik
-          initialValues={{
-            nome: "",
-            sobrenome: "",
-            dataNascimento: null,
-          }}
+          initialValues={formValues}
           validationSchema={AgendamentoInicialSchema}
           onSubmit={handleSubmit}
         >
-          <Form className="w-full px-10">
-            <div className="flex flex-col gap-6 ">
-              <div className="flex flex-col w-full">
-                <label htmlFor="nome" className="text-sm text-[#5E6366]">
-                  Nome
-                </label>
-                <Field
-                  name="nome"
-                  id="nome"
-                  placeholder="Fulano"
-                  className="rounded-lg px-4 py-3 bg-[#EFF1F9] w-full focus:outline-none focus:none focus:none focus:border-transparent"
-                  required
-                />
-                <ErrorMessage name="nome" component={ErrorStyled} />
+          {({ handleChange, setFieldValue }) => (
+            <Form className="w-full px-10">
+              <div className="flex flex-col gap-6 ">
+                <div className="flex flex-col w-full">
+                  <label htmlFor="nome" className="text-sm text-[#5E6366]">
+                    Nome
+                  </label>
+                  <Field
+                    name="nome"
+                    id="nome"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleChange(e);
+                      setFormValues((prevValues) => ({
+                        ...prevValues,
+                        nome: e.target.value,
+                      }));
+                    }}
+                    placeholder="Fulano"
+                    className="rounded-lg px-4 py-3 bg-[#EFF1F9] w-full focus:outline-none focus:none focus:none focus:border-transparent"
+                    required
+                  />
+                  <ErrorMessage name="nome" component={ErrorStyled} />
+                </div>
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="sobrenome"
+                    className="text-sm text-[#5E6366] focus:outline-none focus:none focus:none focus:border-transparent"
+                  >
+                    Sobrenome
+                  </label>
+                  <Field
+                    name="sobrenome"
+                    id="sobrenome"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleChange(e);
+                      setFormValues((prevValues) => ({
+                        ...prevValues,
+                        sobrenome: e.target.value,
+                      }));
+                    }}
+                    placeholder="Da Silva"
+                    className="rounded-lg py-3 px-4 bg-[#EFF1F9] focus:outline-none focus:none focus:none focus:border-transparent"
+                    required
+                  />
+                  <ErrorMessage name="sobrenome" component={ErrorStyled} />
+                </div>
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="dataNascimento"
+                    className="text-sm text-[#5E6366]"
+                  >
+                    Data de nascimento
+                  </label>
+                  <Field name="dataNascimento" required>
+                    {({ field, form }: { field: any; form: any }) => (
+                      <DatePicker
+                        {...field}
+                        id="dataNascimento"
+                        selected={field.value}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="dd/mm/aaaa"
+                        showYearDropdown
+                        closeOnScroll={true}
+                        peekNextMonth
+                        showMonthDropdown
+                        dropdownMode="select"
+                        scrollableYearDropdown
+                        onChange={(date: Date) => {
+                          form.setFieldValue("dataNascimento", date);
+                          setFormValues((prevValues) => ({
+                            ...prevValues,
+                            dataNascimento: date,
+                          }));
+                        }}
+                        className="rounded-lg py-3 w-full px-4 bg-[#EFF1F9] focus:outline-none"
+                      />
+                    )}
+                  </Field>
+                  <ErrorMessage name="dataNascimento" component={ErrorStyled} />
+                </div>
+                <div className="flex flex-row gap-10 pt-10 justify-center">
+                  <Button
+                    variant="outline"
+                    border="2px"
+                    size="lg"
+                    colorScheme="primary"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button size="lg" colorScheme="primary" type="submit">
+                    Continuar
+                  </Button>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <label
-                  htmlFor="sobrenome"
-                  className="text-sm text-[#5E6366] focus:outline-none focus:none focus:none focus:border-transparent"
-                >
-                  Sobrenome
-                </label>
-                <Field
-                  name="sobrenome"
-                  id="sobrenome"
-                  placeholder="Da Silva"
-                  className="rounded-lg py-3 px-4 bg-[#EFF1F9] focus:outline-none focus:none focus:none focus:border-transparent"
-                  required
-                />
-                <ErrorMessage name="sobrenome" component={ErrorStyled} />
-              </div>
-              <div className="flex flex-col">
-                <label
-                  htmlFor="dataNascimento"
-                  className="text-sm text-[#5E6366]"
-                >
-                  Data de nascimento
-                </label>
-                <Field name="dataNascimento" required>
-                  {({ field, form }: { field: any; form: any }) => (
-                    <DatePicker
-                      {...field}
-                      id="dataNascimento"
-                      selected={field.value}
-                      dateFormat="dd/MM/yyyy"
-                      placeholderText="dd/mm/aaaa"
-                      showYearDropdown
-                      closeOnScroll={true}
-                      peekNextMonth
-                      showMonthDropdown
-                      dropdownMode="select"
-                      scrollableYearDropdown
-                      onChange={(date: Date) =>
-                        form.setFieldValue("dataNascimento", date)
-                      }
-                      className="rounded-lg py-3 w-full px-4 bg-[#EFF1F9] focus:outline-none"
-                    />
-                  )}
-                </Field>
-                <ErrorMessage name="dataNascimento" component={ErrorStyled} />
-              </div>
-              <div className="flex flex-row gap-10 pt-10 justify-center">
-                <Button
-                  variant="outline"
-                  border="2px"
-                  size="lg"
-                  colorScheme="primary"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  size="lg"
-                  colorScheme="primary"
-                  type="submit"
-                >
-                  Continuar
-                </Button>
-              </div>
-            </div>
-          </Form>
+            </Form>
+          )}
         </Formik>
       </div>
     </div>

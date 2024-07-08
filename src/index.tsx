@@ -9,6 +9,8 @@ import { inputAnatomy } from "@chakra-ui/anatomy";
 import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
 import Home from "./routes/Home";
 import AgendamentoInicial from "./routes/AgendamentoInicial";
+import { Provider } from "react-redux";
+import store from "./redux/store";
 
 const router = createBrowserRouter([
   {
@@ -36,7 +38,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <ChakraProvider theme={theme}>
     <React.StrictMode>
-      <RouterProvider router={router} />
+      <Provider store={store}>
+        <RouterProvider router={router} />
+      </Provider>
     </React.StrictMode>
   </ChakraProvider>
 );
