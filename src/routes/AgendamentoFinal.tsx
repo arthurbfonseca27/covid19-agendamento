@@ -14,6 +14,10 @@ import { useDisclosure } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import ptBR from "date-fns/locale/pt-BR";
 import { IoArrowBackOutline } from "react-icons/io5";
+import { Box } from "@chakra-ui/react";
+import { FaCheckCircle } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
 import {
   Drawer,
   DrawerBody,
@@ -23,6 +27,20 @@ import {
   DrawerContent,
   DrawerCloseButton,
 } from "@chakra-ui/react";
+import {
+  Step,
+  StepDescription,
+  StepIcon,
+  StepIndicator,
+  StepNumber,
+  StepSeparator,
+  StepStatus,
+  StepTitle,
+  Stepper,
+  useSteps,
+} from "@chakra-ui/react";
+import useModal from "../hooks/useModal";
+import { MdError } from "react-icons/md";
 
 interface FormValues {
   dataAgendamento: Date | null;
@@ -30,6 +48,8 @@ interface FormValues {
 }
 
 const AgendamentoFinal = () => {
+  const [dataValida, setDataValida] = useState<Date | string>("");
+  const pessoa = useSelector((state: RootState) => state.pessoa);
   const [formValues, setFormValues] = useState<FormValues>(() => {
     const data = localStorage.getItem("formValues");
     if (data) {
@@ -51,12 +71,23 @@ const AgendamentoFinal = () => {
   const navigate = useNavigate();
 
   const handleSubmit = (values: FormValues) => {
-    console.log("sexo sexo");
-    dispatch(setHorario(values.horario));
-    if (values.dataAgendamento) {
-      dispatch(setDataAgendamento(values.dataAgendamento.toLocaleDateString()));
+    if (pessoa.nome && pessoa.sobrenome && pessoa.dataNascimento) {
+      setActiveStep(2);
+
+      dispatch(setHorario(values.horario));
+
+      if (values.dataAgendamento) {
+        dispatch(
+          setDataAgendamento(values.dataAgendamento.toLocaleDateString())
+        );
+      }
+
+      handlerShowCorrectModal();
+      navigate("/");
+    } else {
+      handlerShowErrorModal();
+      navigate("/AgendamentoInicial");
     }
-    navigate("/");
   };
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -66,41 +97,82 @@ const AgendamentoFinal = () => {
     font-size: 14px;
   `;
 
+  const { showModal } = useModal();
+
+  const handlerShowCorrectModal = () => {
+    showModal({
+      title: "Agendamento realizado com sucesso!",
+      description:
+        "Você foi direcionado para a página inicial da plataforma e poderá consultar seu agendamento.",
+      confirmText: "Entendido!",
+      icon: <FaCheckCircle size={48} color="#10FE0C" />,
+    });
+  };
+
+  const handlerShowErrorModal = () => {
+    showModal({
+      title: "Ooops! Agendamento inválido!",
+      description:
+        "Verifique se todos os dados foram preenchidos corretamente.",
+      confirmText: "Tente novamente",
+      icon: <MdError size={48} color="#FF1010" />,
+    });
+  };
+
   const [selectedTime, setSelectedTime] = useState<string>("");
   const times = Array.from(
     { length: 11 },
     (_, i) => `${String(i + 8).padStart(2, "0")}:00`
   );
 
+  const steps = [
+    { title: "Primeiro passo", description: "Informações pessoais" },
+    { title: "Segundo passo", description: "Data & Horário" },
+  ];
+
+  const { activeStep, setActiveStep } = useSteps({
+    index: 1,
+    count: steps.length,
+  });
+
+  const handleDataChange = async (date: Date) => {
+    try {
+      await AgendamentoFinalSchema.validate({ dataAgendamento: date });
+      setDataValida(date);
+    } catch (err) {
+      setDataValida("");
+    }
+  };
+
   return (
     <div className="bg-[#F9F9FC] min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center justify-center w-1/2 h-1/2 bg-[#FFFFFF] py-8 rounded-3xl border border-[#DDE2E5]">
         <div className="flex flex-col pl-10 gap-8 justify-start items-start text-2xl w-full pb-4 pt-1">
-          <Button
-            variant="outline"
-            border="2px"
-            aria-label="Back"
-            colorScheme="primary"
-            leftIcon={<IoArrowBackOutline />}
-          >
-            <nav>
-              <Link to="/AgendamentoInicial">Voltar</Link>
-            </nav>
-          </Button>
-          <p className="text-2xl w-full  ">Agende seu horário</p>
+          <p className="text-2xl w-full pb-11">Agende seu horário</p>
         </div>
-        <div className="flex flex-row gap-1 text-sm pb-4 justify-end items-end w-full px-10">
-          <p className="text-[#5570F1]">Passo 2</p>
-          <p className="text-[#83898C]">de 2</p>
-        </div>
+        <div className="flex flex-row gap-1 text-sm justify-end items-end w-full px-10"></div>
         <div className="flex flex-row w-full pb-10">
-          <div className="px-5"></div>
-          <Progress
-            value={100}
-            hasStripe
-            colorScheme="primary"
-            className="w-full rounded-3xl"
-          />
+          <div className="px-5 "></div>
+          <Stepper index={activeStep} colorScheme="primary" className="w-full">
+            {steps.map((step, index) => (
+              <Step key={index}>
+                <StepIndicator>
+                  <StepStatus
+                    complete={<StepIcon />}
+                    incomplete={<StepNumber />}
+                    active={<StepNumber />}
+                  />
+                </StepIndicator>
+
+                <Box>
+                  <StepTitle>{step.title}</StepTitle>
+                  <StepDescription>{step.description}</StepDescription>
+                </Box>
+
+                <StepSeparator />
+              </Step>
+            ))}
+          </Stepper>
           <div className="px-5"></div>
         </div>
         <Formik
@@ -136,6 +208,7 @@ const AgendamentoFinal = () => {
                           scrollableYearDropdown
                           onChange={(date: Date) => {
                             form.setFieldValue("dataAgendamento", date);
+                            handleDataChange(date);
                             setFormValues((prevValues) => ({
                               ...prevValues,
                               dataAgendamento: date,
@@ -171,18 +244,22 @@ const AgendamentoFinal = () => {
                     </div>
                   </div>
                 </div>
-                {formValues.dataAgendamento && formValues.horario && (
-                  <div className="gap-1 w-full">
-                    <span className="pr-1">Data e horário do agendamento:</span>
-                    <span className="font-bold text-[#5570F1]">
-                      {formValues.dataAgendamento.toLocaleDateString()}{" "}
-                    </span>
-                    <span className="pr-1">às</span>
-                    <span className="font-bold text-[#5570F1]">
-                      {formValues.horario}
-                    </span>
-                  </div>
-                )}
+                {dataValida &&
+                  formValues.dataAgendamento &&
+                  formValues.horario && (
+                    <div className="gap-1 w-full">
+                      <span className="pr-1">
+                        Data e horário do agendamento:
+                      </span>
+                      <span className="font-bold text-[#5570F1]">
+                        {formValues.dataAgendamento.toLocaleDateString()}{" "}
+                      </span>
+                      <span className="pr-1">às</span>
+                      <span className="font-bold text-[#5570F1]">
+                        {formValues.horario}
+                      </span>
+                    </div>
+                  )}
               </div>
               <div>
                 <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
@@ -196,7 +273,7 @@ const AgendamentoFinal = () => {
                         {times.map((time, index) => (
                           <Button
                             key={index}
-                            width="200px"
+                            width="full"
                             colorScheme={
                               time === selectedTime ? "primary" : "gray"
                             }

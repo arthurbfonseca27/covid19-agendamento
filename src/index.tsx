@@ -13,12 +13,13 @@ import AgendamentoFinal from "./routes/AgendamentoFinal";
 import ErrorPage from "./routes/Error404";
 import { Provider } from "react-redux";
 import store from "./redux/store";
+import { ModalProvider } from "./context/ModalContext";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Home />,
-    errorElement: <ErrorPage/>
+    errorElement: <ErrorPage />,
   },
   {
     path: "/AgendamentoInicial",
@@ -42,11 +43,14 @@ const theme = extendTheme({
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
+
 root.render(
   <ChakraProvider theme={theme}>
     <React.StrictMode>
       <Provider store={store}>
-        <RouterProvider router={router} />
+        <ModalProvider>
+          <RouterProvider router={router} />
+        </ModalProvider>
       </Provider>
     </React.StrictMode>
   </ChakraProvider>
