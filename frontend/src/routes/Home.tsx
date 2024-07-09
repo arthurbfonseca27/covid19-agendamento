@@ -18,7 +18,9 @@ const Home = () => {
           </nav>
         </Button>
         <Button leftIcon={<FaSearch />} size="lg" colorScheme="primary" fontWeight='normal'  width="180px">
-          Consultar
+        <nav>
+            <Link to="/Consulta">Consultar</Link>
+          </nav>
         </Button>
       </div>
     </div>

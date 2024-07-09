@@ -1,0 +1,33 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "ts-node-dev src/server.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arthurbfonseca27/covid19-agendamento.git"
+  },
+  "author": "Arthur Fonseca",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arthurbfonseca27/covid19-agendamento/issues"
+  },
+  "homepage": "https://github.com/arthurbfonseca27/covid19-agendamento#readme",
+  "description": "",
+  "devDependencies": {
+    "prisma": "^5.16.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.16.1",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "express-async-errors": "^3.1.1"
+  }
+}

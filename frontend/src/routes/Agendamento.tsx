@@ -7,6 +7,18 @@ import { Button } from "@chakra-ui/react";
 import styled from "styled-components";
 import { useDispatch } from "react-redux";
 import useModal from "../hooks/useModal";
+import {
+  Step,
+  StepDescription,
+  StepIcon,
+  StepIndicator,
+  StepNumber,
+  StepSeparator,
+  StepStatus,
+  StepTitle,
+  Stepper,
+  useSteps,
+} from '@chakra-ui/react'
 import { FaCheckCircle } from "react-icons/fa";
 import * as Yup from "yup";
 import {
@@ -129,7 +141,7 @@ const Agendamento = () => {
     <div className="bg-[#F9F9FC] min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center justify-center w-1/2 h-1/2 bg-[#FFFFFF] py-8 rounded-3xl border border-[#DDE2E5]">
         <p className="flex pl-10 justify-start items-start text-2xl w-full pb-4 pt-1 font-redHatDisplay">
-          Agende seu horário
+          Agende o horário do paciente
         </p>
         <div className="flex flex-row gap-1 text-sm pb-9 justify-end items-end w-full px-10"></div>
         <Formik
