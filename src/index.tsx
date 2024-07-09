@@ -10,6 +10,7 @@ import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
 import Home from "./routes/Home";
 import AgendamentoInicial from "./routes/AgendamentoInicial";
 import AgendamentoFinal from "./routes/AgendamentoFinal";
+import Consulta from "./routes/Consulta";
 import ErrorPage from "./routes/Error404";
 import { Provider } from "react-redux";
 import store from "./redux/store";
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
   {
     path: "/AgendamentoFinal",
     element: <AgendamentoFinal />,
+  },
+  {
+    path: "/Consulta",
+    element: <Consulta />,
   },
 ]);
 
