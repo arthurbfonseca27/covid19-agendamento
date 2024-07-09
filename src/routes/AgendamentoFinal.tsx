@@ -16,6 +16,8 @@ import ptBR from "date-fns/locale/pt-BR";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { Box } from "@chakra-ui/react";
 import { FaCheckCircle } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
 import {
   Drawer,
   DrawerBody,
@@ -38,6 +40,7 @@ import {
   useSteps,
 } from "@chakra-ui/react";
 import useModal from "../hooks/useModal";
+import { MdError } from "react-icons/md";
 
 interface FormValues {
   dataAgendamento: Date | null;
@@ -45,6 +48,8 @@ interface FormValues {
 }
 
 const AgendamentoFinal = () => {
+  const [dataValida, setDataValida] = useState<Date | string>("");
+  const pessoa = useSelector((state: RootState) => state.pessoa);
   const [formValues, setFormValues] = useState<FormValues>(() => {
     const data = localStorage.getItem("formValues");
     if (data) {
@@ -66,14 +71,23 @@ const AgendamentoFinal = () => {
   const navigate = useNavigate();
 
   const handleSubmit = (values: FormValues) => {
-    setActiveStep(2);
-    dispatch(setHorario(values.horario));
-    if (values.dataAgendamento) {
-      dispatch(setDataAgendamento(values.dataAgendamento.toLocaleDateString()));
-    }
-    handlerShowModal(); 
+    if (pessoa.nome && pessoa.sobrenome && pessoa.dataNascimento) {
+      setActiveStep(2);
 
-    navigate("/");
+      dispatch(setHorario(values.horario));
+
+      if (values.dataAgendamento) {
+        dispatch(
+          setDataAgendamento(values.dataAgendamento.toLocaleDateString())
+        );
+      }
+
+      handlerShowCorrectModal();
+      navigate("/");
+    } else {
+      handlerShowErrorModal();
+      navigate("/AgendamentoInicial");
+    }
   };
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -85,13 +99,23 @@ const AgendamentoFinal = () => {
 
   const { showModal } = useModal();
 
-  const handlerShowModal = () => {
+  const handlerShowCorrectModal = () => {
     showModal({
       title: "Agendamento realizado com sucesso!",
       description:
         "Você foi direcionado para a página inicial da plataforma e poderá consultar seu agendamento.",
       confirmText: "Entendido!",
       icon: <FaCheckCircle size={48} color="#10FE0C" />,
+    });
+  };
+
+  const handlerShowErrorModal = () => {
+    showModal({
+      title: "Ooops! Agendamento inválido!",
+      description:
+        "Verifique se todos os dados foram preenchidos corretamente.",
+      confirmText: "Tente novamente",
+      icon: <MdError size={48} color="#FF1010" />,
     });
   };
 
@@ -110,6 +134,15 @@ const AgendamentoFinal = () => {
     index: 1,
     count: steps.length,
   });
+
+  const handleDataChange = async (date: Date) => {
+    try {
+      await AgendamentoFinalSchema.validate({ dataAgendamento: date });
+      setDataValida(date);
+    } catch (err) {
+      setDataValida("");
+    }
+  };
 
   return (
     <div className="bg-[#F9F9FC] min-h-screen flex items-center justify-center">
@@ -175,6 +208,7 @@ const AgendamentoFinal = () => {
                           scrollableYearDropdown
                           onChange={(date: Date) => {
                             form.setFieldValue("dataAgendamento", date);
+                            handleDataChange(date);
                             setFormValues((prevValues) => ({
                               ...prevValues,
                               dataAgendamento: date,
@@ -210,18 +244,22 @@ const AgendamentoFinal = () => {
                     </div>
                   </div>
                 </div>
-                {formValues.dataAgendamento && formValues.horario && (
-                  <div className="gap-1 w-full">
-                    <span className="pr-1">Data e horário do agendamento:</span>
-                    <span className="font-bold text-[#5570F1]">
-                      {formValues.dataAgendamento.toLocaleDateString()}{" "}
-                    </span>
-                    <span className="pr-1">às</span>
-                    <span className="font-bold text-[#5570F1]">
-                      {formValues.horario}
-                    </span>
-                  </div>
-                )}
+                {dataValida &&
+                  formValues.dataAgendamento &&
+                  formValues.horario && (
+                    <div className="gap-1 w-full">
+                      <span className="pr-1">
+                        Data e horário do agendamento:
+                      </span>
+                      <span className="font-bold text-[#5570F1]">
+                        {formValues.dataAgendamento.toLocaleDateString()}{" "}
+                      </span>
+                      <span className="pr-1">às</span>
+                      <span className="font-bold text-[#5570F1]">
+                        {formValues.horario}
+                      </span>
+                    </div>
+                  )}
               </div>
               <div>
                 <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
