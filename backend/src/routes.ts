@@ -1,9 +1,11 @@
 import { Router } from "express";
 
-import { CreateAppointmentController } from "./controllers/agendamento/CreateAppointmentController"
+import { ListAppointmentController } from "./controllers/agendamento/ListAppointmentController";
+import { CreateAppointmentController } from "./controllers/agendamento/CreateAppointmentController";
 
 const router = Router();
 
-router.post("/agendamentos", new CreateAppointmentController().handle)
+router.post("/agendamentos", new CreateAppointmentController().handle);
+router.get("/agendamentos", new ListAppointmentController().handle);
 
-export { router }
+export { router };
