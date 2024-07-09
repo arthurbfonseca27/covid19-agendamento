@@ -8,8 +8,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { inputAnatomy } from "@chakra-ui/anatomy";
 import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
 import Home from "./routes/Home";
-import AgendamentoInicial from "./routes/AgendamentoInicial";
-import AgendamentoFinal from "./routes/AgendamentoFinal";
+import Agendamento from "./routes/Agendamento";
 import Consulta from "./routes/Consulta";
 import ErrorPage from "./routes/Error404";
 import { Provider } from "react-redux";
@@ -23,12 +22,8 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
   {
-    path: "/AgendamentoInicial",
-    element: <AgendamentoInicial />,
-  },
-  {
-    path: "/AgendamentoFinal",
-    element: <AgendamentoFinal />,
+    path: "/Agendamento",
+    element: <Agendamento />,
   },
   {
     path: "/Consulta",

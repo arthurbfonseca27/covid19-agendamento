@@ -14,7 +14,7 @@ const Home = () => {
       <div className="flex flex-row gap-8 justify-center items-center">
         <Button leftIcon={<LiaClipboardListSolid size={20  }/>} size="lg" colorScheme="primary" fontWeight='normal'  width="180px">
           <nav>
-            <Link to="/AgendamentoInicial">Agendar</Link>
+            <Link to="/Agendamento">Agendar</Link>
           </nav>
         </Button>
         <Button leftIcon={<FaSearch />} size="lg" colorScheme="primary" fontWeight='normal'  width="180px">
