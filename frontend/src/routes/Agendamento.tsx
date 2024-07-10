@@ -7,6 +7,9 @@ import { Button } from "@chakra-ui/react";
 import styled from "styled-components";
 import { useDispatch } from "react-redux";
 import useModal from "../hooks/useModal";
+import { MdError } from "react-icons/md";
+import axios from "axios";
+import api from "../services/api";
 import {
   Step,
   StepDescription,
@@ -18,7 +21,7 @@ import {
   StepTitle,
   Stepper,
   useSteps,
-} from '@chakra-ui/react'
+} from "@chakra-ui/react";
 import { FaCheckCircle } from "react-icons/fa";
 import * as Yup from "yup";
 import {
@@ -51,6 +54,8 @@ interface FormValues {
 
 const Agendamento = () => {
   const [dataValida, setDataValida] = useState<Date | string>("");
+  const [statusAgendamento, setStatusAgendamento] = useState<Boolean>(true);
+  const [horariosDisponiveis, setHorariosDisponiveis] = useState<string[]>([]);
   const [formValues, setFormValues] = useState<FormValues>(() => {
     const data = localStorage.getItem("formValues");
     if (data) {
@@ -73,11 +78,6 @@ const Agendamento = () => {
     }
   });
 
-  const times = Array.from(
-    { length: 11 },
-    (_, i) => `${String(i + 8).padStart(2, "0")}:00`
-  );
-
   useEffect(() => {
     localStorage.setItem("formValues", JSON.stringify(formValues));
   }, [formValues]);
@@ -85,19 +85,53 @@ const Agendamento = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleSubmit = (values: FormValues) => {
-    dispatch(setNome(values.nome));
-    dispatch(setSobrenome(values.sobrenome));
-    if (values.dataNascimento) {
-      dispatch(setDataNascimento(values.dataNascimento.toLocaleDateString()));
-    }
-    if (values.dataAgendamento) {
-      dispatch(setDataAgendamento(values.dataAgendamento.toLocaleDateString()));
-    }
-    dispatch(setHorario(values.horario));
+  const handleSubmit = async (values: FormValues) => {
+    try {
+      // Despachando as ações para atualizar o estado no Redux
+      dispatch(setNome(values.nome));
+      dispatch(setSobrenome(values.sobrenome));
+      if (values.dataNascimento) {
+        dispatch(setDataNascimento(values.dataNascimento.toLocaleDateString()));
+      }
+      if (values.dataAgendamento) {
+        dispatch(
+          setDataAgendamento(values.dataAgendamento.toLocaleDateString())
+        );
+      }
+      dispatch(setHorario(values.horario));
 
-    handlerShowCorrectModal();
-    navigate("/");
+      const hoje = new Date(); // Obtém a data atual
+
+      // Verifica se a data de agendamento é anterior à data atual
+      if (values.dataAgendamento != null && values.dataAgendamento < hoje) {
+        setStatusAgendamento(false); // Define status como false se for anterior
+      } else {
+        setStatusAgendamento(true); // Caso contrário, mantém como true
+      }
+
+      // Enviando os dados para a API
+      const response = await api.post("/agendamentos", {
+        nome: values.nome,
+        sobrenome: values.sobrenome,
+        dataNascimento: values.dataNascimento,
+        dataAgendamento: values.dataAgendamento,
+        horarioAgendamento: values.horario,
+        status: statusAgendamento,
+      });
+
+      // Verificando se a resposta foi bem sucedida
+      if (response.status === 200) {
+        handlerShowCorrectModal();
+        navigate("/");
+      } else {
+        handlerShowErrorModal(
+          `Erro ao cadastrar o agendamento: ${response.data}`
+        );
+        console.error();
+      }
+    } catch (error) {
+      handlerShowErrorModal(`Erro ao cadastrar o agendamento: ${error}`);
+    }
   };
 
   const ErrorStyled = styled.span`
@@ -108,13 +142,21 @@ const Agendamento = () => {
   const { showModal } = useModal();
 
   const handlerShowCorrectModal = () => {
-    console.log("entrou");
     showModal({
       title: "Agendamento realizado com sucesso!",
       description:
         "Você foi direcionado para a página inicial da plataforma e poderá consultar os agendamentos realizados.",
       confirmText: "Entendido!",
       icon: <FaCheckCircle size={48} color="#10FE0C" />,
+    });
+  };
+
+  const handlerShowErrorModal = (error: string) => {
+    showModal({
+      title: "Ooops! Agendamento inválido!",
+      description: error,
+      confirmText: "Tente novamente",
+      icon: <MdError size={48} color="#FF1010" />,
     });
   };
 
@@ -131,6 +173,26 @@ const Agendamento = () => {
       console.log(date);
       console.log({ dataAgendamento: date });
       console.log("Data inválida");
+    }
+  };
+
+  useEffect(() => {
+    // Buscar horários disponíveis quando a data de agendamento mudar
+    if (formValues.dataAgendamento) {
+      fetchHorariosDisponiveis();
+    }
+  }, [formValues.dataAgendamento]);
+
+  const fetchHorariosDisponiveis = async () => {
+    try {
+      const response = await api.get("/horarios-disponiveis", {
+        params: {
+          dataAgendamento: formValues.dataAgendamento?.toISOString(),
+        },
+      });
+      setHorariosDisponiveis(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar horários disponíveis:", error);
     }
   };
 
@@ -319,7 +381,7 @@ const Agendamento = () => {
 
                       <DrawerBody>
                         <Stack spacing="24px">
-                          {times.map((time, index) => (
+                          {horariosDisponiveis.map((time, index) => (
                             <Button
                               key={index}
                               width="full"
