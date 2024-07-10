@@ -30,6 +30,7 @@ import {
 import { Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 import { IconButton } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
+import { FiAlertCircle } from "react-icons/fi";
 import {
   Drawer,
   DrawerBody,
@@ -42,6 +43,15 @@ import {
 import { Input } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/react";
 import { MdDelete } from "react-icons/md";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+} from "@chakra-ui/react";
 
 type ButtonName = "consulta" | "gerenciar";
 
@@ -57,8 +67,15 @@ interface Agendamento {
 
 const Consulta = () => {
   const [selectedButton, setSelectedButton] = useState<ButtonName>("consulta");
-  const [dataSelecionada, setDataSelecionada] = useState<Date | null>(null);
+  const [dataSelecionada, setDataSelecionada] = useState<Date | null>(() => {
+    const storedDate = localStorage.getItem("dataSelecionada");
+    return storedDate ? new Date(storedDate) : null;
+  });
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
+  const [agendamentoParaExcluir, setAgendamentoParaExcluir] = useState<
+    string | null
+  >(null);
+
   const [selectAll, setSelectAll] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<boolean>(true);
   const [exibirAgendado, setExibirAgendado] = useState<boolean>(true);
@@ -83,6 +100,14 @@ const Consulta = () => {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (dataSelecionada) {
+      localStorage.setItem("dataSelecionada", dataSelecionada.toISOString());
+    } else {
+      localStorage.removeItem("dataSelecionada");
+    }
+  }, [dataSelecionada]);
 
   useEffect(() => {
     if (dataSelecionada) {
@@ -115,6 +140,12 @@ const Consulta = () => {
   const handleExibirRealizado = () => {
     setExibirRealizado(!exibirRealizado);
   };
+
+  const {
+    isOpen: isOpenModal,
+    onOpen: onOpenModal,
+    onClose: onCloseModal,
+  } = useDisclosure();
 
   const handleButtonClick = (buttonName: ButtonName) => {
     setSelectedButton(buttonName);
@@ -191,6 +222,20 @@ const Consulta = () => {
     }
   };
 
+  const handleDeleteAppointment = async (id: string) => {
+    const response = await api.delete(`/agendamentos/${id}`);
+
+    if (response.status === 200) {
+      // Remove o agendamento excluído do estado
+      setAgendamentos((prevAgendamentos) =>
+        prevAgendamentos.filter((agendamento) => agendamento.id !== id)
+      );
+      onCloseModal();
+    } else {
+      console.error(`Erro ao remover o agendamento: ${response.data}`);
+    }
+  };
+
   const mapTest = agendamentosFiltrados.length + 1;
 
   const allChecked = checkedItems.every(Boolean);
@@ -252,7 +297,7 @@ const Consulta = () => {
                   <DrawerOverlay />
                   <DrawerContent>
                     <DrawerCloseButton />
-                    <DrawerHeader>Gerenciar agendamentos</DrawerHeader>
+                    <DrawerHeader>Alteração do Status</DrawerHeader>
 
                     <DrawerBody>
                       <div className="font-semibold text-base pb-4">
@@ -284,11 +329,11 @@ const Consulta = () => {
                     </DrawerBody>
 
                     <DrawerFooter>
-                      <Button variant="outline" mr={3} onClick={onClose}>
+                      <Button variant="outline" colorScheme="primary" mr={3} onClick={onClose}>
                         Cancel
                       </Button>
                       <Button
-                        colorScheme="blue"
+                        colorScheme="primary"
                         onClick={() => handleCloseAppointment(selectedStatus)}
                       >
                         Confirmar
@@ -385,7 +430,6 @@ const Consulta = () => {
                       <Th>Horário</Th>
                       <Th>Status</Th>
                       <Th>Apagar</Th>
-                      <Th>Editar</Th>
                     </Tr>
                   </Thead>
                   <Tbody className="rounded-lg">
@@ -422,13 +466,10 @@ const Consulta = () => {
                             aria-label="Delete"
                             icon={<MdDelete size={20} color="#FF4949" />}
                             bg="none"
-                          />
-                        </Td>
-                        <Td>
-                          <IconButton
-                            aria-label="Edit"
-                            icon={<FaEdit color="#5570F1" />}
-                            bg="none"
+                            onClick={() => {
+                              setAgendamentoParaExcluir(agendamento.id);
+                              onOpenModal();
+                            }}
                           />
                         </Td>
                       </Tr>
@@ -438,6 +479,98 @@ const Consulta = () => {
               </TableContainer>
             </div>
           </div>
+          <Modal isOpen={isOpenModal} size="lg" onClose={onCloseModal}>
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>
+                <div className="flex flex-col justify-center items-center">
+                  <div className="pb-4">
+                    <FiAlertCircle color="red" size={40} />
+                  </div>
+                  <p className="text-lg">
+                    Tem certeza que deseja apagar esse agendamento?
+                  </p>
+                </div>
+              </ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <div className="flex justify-center items-center">
+                  <p className="text-[#54595E]">
+                    As alterações não poderão ser desfeitas.
+                  </p>
+                </div>
+              </ModalBody>
+
+              <ModalFooter>
+                <Button
+                  colorScheme="red"
+                  variant="outline"
+                  border="2px"
+                  mr={3}
+                  onClick={onCloseModal}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="solid"
+                  colorScheme="red"
+                  onClick={() => {
+                    if (agendamentoParaExcluir) {
+                      handleDeleteAppointment(agendamentoParaExcluir);
+                    }
+                  }}
+                >
+                  Apagar
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+          <Modal isOpen={isOpenModal} size="lg" onClose={onCloseModal}>
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>
+                <div className="flex flex-col justify-center items-center">
+                  <div className="pb-4">
+                    <FiAlertCircle color="red" size={40} />
+                  </div>
+                  <p className="text-lg">
+                    Tem certeza que deseja apagar esse agendamento?
+                  </p>
+                </div>
+              </ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <div className="flex justify-center items-center">
+                  <p className="text-[#54595E]">
+                    As alterações não poderão ser desfeitas.
+                  </p>
+                </div>
+              </ModalBody>
+
+              <ModalFooter>
+                <Button
+                  colorScheme="red"
+                  variant="outline"
+                  border="2px"
+                  mr={3}
+                  onClick={onCloseModal}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="solid"
+                  colorScheme="red"
+                  onClick={() => {
+                    if (agendamentoParaExcluir) {
+                      handleDeleteAppointment(agendamentoParaExcluir);
+                    }
+                  }}
+                >
+                  Apagar
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
         </div>
       </div>
     </div>
