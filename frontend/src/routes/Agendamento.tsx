@@ -152,6 +152,14 @@ const Agendamento = () => {
   };
 
   const handlerShowErrorModal = (error: string) => {
+    setFormValues({
+      nome: "",
+      sobrenome: "",
+      dataNascimento: null,
+      dataAgendamento: null,
+      horario: "",
+    });
+
     showModal({
       title: "Ooops! Agendamento inválido!",
       description: error,
