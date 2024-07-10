@@ -202,8 +202,8 @@ const Agendamento = () => {
   return (
     <div className="bg-[#F9F9FC] min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center justify-center w-1/2 h-1/2 bg-[#FFFFFF] py-8 rounded-3xl border border-[#DDE2E5]">
-        <p className="flex pl-10 justify-start items-start text-2xl w-full pb-4 pt-1 font-redHatDisplay">
-          Agende o horário do paciente
+        <p className="flex pl-10 justify-start items-start text-2xl w-full pb-1 pt-1 font-redHatDisplay">
+          Informações do paciente
         </p>
         <div className="flex flex-row gap-1 text-sm pb-9 justify-end items-end w-full px-10"></div>
         <Formik
@@ -339,19 +339,26 @@ const Agendamento = () => {
                       >
                         Horário de Agendamento
                       </label>
-                      <div className="rounded-lg py-1 bg-[#EFF1F9] focus:outline-none">
-                        <Button
-                          onClick={
-                            formValues.dataAgendamento ? onOpen : () => {}
-                          }
-                          width="full"
-                          color={formValues.horario ? "#000000" : "#ABAFB1"}
-                          fontWeight="normal"
-                          _hover={{ bg: "#EFF1F9" }}
-                        >
-                          {formValues.horario ? formValues.horario : "00:00"}
-                        </Button>
-                      </div>
+                      <Field name="horario" required>
+                        {({ field, form }: { field: any; form: any }) => (
+                          <div className="rounded-lg py-1 bg-[#EFF1F9] focus:outline-none">
+                            <Button
+                              onClick={
+                                formValues.dataAgendamento ? onOpen : () => {}
+                              }
+                              width="full"
+                              color={formValues.horario ? "#000000" : "#ABAFB1"}
+                              fontWeight="normal"
+                              _hover={{ bg: "#EFF1F9" }}
+                            >
+                              {formValues.horario
+                                ? formValues.horario
+                                : "00:00"}
+                            </Button>
+                          </div>
+                        )}
+                      </Field>
+                      <ErrorMessage name="horario" component={ErrorStyled} />
                     </div>
                   </div>
 
