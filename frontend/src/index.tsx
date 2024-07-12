@@ -1,19 +1,16 @@
+import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
-import App from "./App";
-import reportWebVitals from "./reportWebVitals";
-import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import { Provider } from "react-redux";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { inputAnatomy } from "@chakra-ui/anatomy";
-import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
-import Home from "./routes/Home";
+import { ModalProvider } from "./context/ModalContext";
+import "./index.css";
+import store from "./redux/store";
+import reportWebVitals from "./reportWebVitals";
 import Agendamento from "./routes/Agendamento";
 import Consulta from "./routes/Consulta";
 import ErrorPage from "./routes/Error404";
-import { Provider } from "react-redux";
-import store from "./redux/store";
-import { ModalProvider } from "./context/ModalContext";
+import Home from "./routes/Home";
 
 const router = createBrowserRouter([
   {

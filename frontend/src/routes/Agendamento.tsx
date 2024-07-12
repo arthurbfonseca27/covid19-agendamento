@@ -49,7 +49,7 @@ interface FormValues {
   sobrenome: string;
   dataNascimento: Date | null;
   dataAgendamento: Date | null;
-  horario: string;
+  horarioAgendamento: string;
 }
 
 const Agendamento = () => {
@@ -73,7 +73,7 @@ const Agendamento = () => {
         sobrenome: "",
         dataNascimento: null,
         dataAgendamento: null,
-        horario: "",
+        horarioAgendamento: "",
       };
     }
   });
@@ -98,7 +98,7 @@ const Agendamento = () => {
           setDataAgendamento(values.dataAgendamento.toLocaleDateString())
         );
       }
-      dispatch(setHorario(values.horario));
+      dispatch(setHorario(values.horarioAgendamento));
 
       const hoje = new Date(); // Obtém a data atual
 
@@ -115,7 +115,7 @@ const Agendamento = () => {
         sobrenome: values.sobrenome,
         dataNascimento: values.dataNascimento,
         dataAgendamento: values.dataAgendamento,
-        horarioAgendamento: values.horario,
+        horarioAgendamento: values.horarioAgendamento,
         status: statusAgendamento,
       });
 
@@ -157,7 +157,7 @@ const Agendamento = () => {
       sobrenome: "",
       dataNascimento: null,
       dataAgendamento: null,
-      horario: "",
+      horarioAgendamento: "",
     });
 
     showModal({
@@ -342,12 +342,12 @@ const Agendamento = () => {
                     </div>
                     <div className="flex flex-col w-1/2">
                       <label
-                        htmlFor="horario"
+                        htmlFor="horarioAgendamento"
                         className="text-sm text-[#5E6366]"
                       >
                         Horário de Agendamento
                       </label>
-                      <Field name="horario" required>
+                      <Field name="horarioAgendamento" required>
                         {({ field, form }: { field: any; form: any }) => (
                           <div className="rounded-lg py-1 bg-[#EFF1F9] focus:outline-none">
                             <Button
@@ -355,24 +355,31 @@ const Agendamento = () => {
                                 formValues.dataAgendamento ? onOpen : () => {}
                               }
                               width="full"
-                              color={formValues.horario ? "#000000" : "#ABAFB1"}
+                              color={
+                                formValues.horarioAgendamento
+                                  ? "#000000"
+                                  : "#ABAFB1"
+                              }
                               fontWeight="normal"
                               _hover={{ bg: "#EFF1F9" }}
                             >
-                              {formValues.horario
-                                ? formValues.horario
+                              {formValues.horarioAgendamento
+                                ? formValues.horarioAgendamento
                                 : "00:00"}
                             </Button>
                           </div>
                         )}
                       </Field>
-                      <ErrorMessage name="horario" component={ErrorStyled} />
+                      <ErrorMessage
+                        name="horarioAgendamento"
+                        component={ErrorStyled}
+                      />
                     </div>
                   </div>
 
                   {dataValida &&
                     formValues.dataAgendamento &&
-                    formValues.horario && (
+                    formValues.horarioAgendamento && (
                       <div className="gap-1 w-full">
                         <span className="pr-1">
                           Data e horário do agendamento:
@@ -382,7 +389,7 @@ const Agendamento = () => {
                         </span>
                         <span className="pr-1">às</span>
                         <span className="font-bold text-[#5570F1]">
-                          {formValues.horario}
+                          {formValues.horarioAgendamento}
                         </span>
                       </div>
                     )}
@@ -418,10 +425,10 @@ const Agendamento = () => {
                         <Button
                           colorScheme="primary"
                           onClick={() => {
-                            setFieldValue("horario", selectedTime);
+                            setFieldValue("horarioAgendamento", selectedTime);
                             setFormValues((prevValues) => ({
                               ...prevValues,
-                              horario: selectedTime,
+                              horarioAgendamento: selectedTime,
                             }));
                             onClose();
                           }}
@@ -454,7 +461,7 @@ const Agendamento = () => {
                     width="180px"
                     borderRadius="12px"
                   >
-                    Continuar
+                    Agendar
                   </Button>
                 </div>
               </div>

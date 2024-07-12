@@ -18,7 +18,9 @@ api.interceptors.response.use(
   }
 );
 
-export default api; // Exportar api como padrão
+export default api; 
+
+// Mudança
 
 export function setupAPIClient() {
   return api;

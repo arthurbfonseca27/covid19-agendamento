@@ -6,11 +6,11 @@ function getYesterday() {
 }
 
 export const AgendamentoSchema = Yup.object().shape({
-  dataAgendamento: Yup.date().min(getYesterday(), "Insira uma data de agendamento válida.").required("Campo obrigatório."),
   nome: Yup.string().required("Campo obrigatório."),
   sobrenome: Yup.string().required("Campo obrigatório."),
   dataNascimento: Yup.date().max(new Date(), "Insira uma data de nascimento válida.").required("Campo obrigatório."),
-  horario: Yup.string().required("Campo obrigatório."),
+  dataAgendamento: Yup.date().min(getYesterday(), "Insira uma data de agendamento válida.").required("Campo obrigatório."),
+  horarioAgendamento: Yup.string().required("Campo obrigatório."),
 });
 
 

@@ -12,7 +12,7 @@ const Home = () => {
       <div className="flex font-light flex-row gap-8 justify-center items-center pt-8">
         <Button size="lg" colorScheme="primary" fontWeight="normal">
           <nav>
-            <Link to="/">Voltar para Home</Link>
+            <Link to="/">Voltar para o início</Link>
           </nav>
         </Button>
       </div>
