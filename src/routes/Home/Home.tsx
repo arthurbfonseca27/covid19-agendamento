@@ -1,7 +1,7 @@
 import React from "react";
 import { LiaClipboardListSolid } from "react-icons/lia";
 import { FaSearch } from "react-icons/fa";
-import Logo from "../assets/Logo.svg";
+import Logo from "public/assets/Logo.svg";
 import { Button, ButtonGroup } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 

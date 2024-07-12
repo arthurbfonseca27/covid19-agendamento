@@ -1,25 +1,49 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
+import Appointment from "./routes/Appoitment/Appointment";
+import Query from "./routes/Query/Query";
+import ErrorPage from "./routes/Error404/Error404";
+import Home from "./routes/Home/Home";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { ModalProvider } from "./context/ModalContext";
+import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Home />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/Agendamento",
+    element: <Appointment />,
+  },
+  {
+    path: "/Consulta",
+    element: <Query />,
+  },
+]);
+
+const theme = extendTheme({
+  colors: {
+    primary: {
+      500: "#5570F1",
+      600: "#405EEF",
+    },
+    success: {
+      500: "#1BA97F",
+      600: "#189973",
+    },
+  },
+});
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ChakraProvider theme={theme}>
+      <ModalProvider>
+        <RouterProvider router={router} />
+      </ModalProvider>
+    </ChakraProvider>
   );
 }
 

@@ -4,7 +4,6 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        redHatDisplay: ["red-hat-display", "sans-serif"],
       },
     },
   },

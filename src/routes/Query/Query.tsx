@@ -1,25 +1,16 @@
 import React, { useState, useEffect } from "react";
-import Logo from "../assets/Logo-branco.svg";
+import Logo from "public/assets/Logo-branco.svg";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { Divider, Button } from "@chakra-ui/react";
-import { FaSearch } from "react-icons/fa";
-import { IoMdMenu } from "react-icons/io";
-import { Badge } from "@chakra-ui/react";
 import DatePicker from "react-datepicker";
 import { Stack, HStack, VStack } from "@chakra-ui/react";
 import { Checkbox } from "@chakra-ui/react";
-import { AgendamentoSchema } from "../validation/Agendamento";
+import { AppointmentSchema } from "../../validation/AppointmentSchema";
 import styled from "styled-components";
 import { IoChevronDown } from "react-icons/io5";
 import { FaEdit } from "react-icons/fa";
-import {
-  Tag,
-  TagLabel,
-  TagLeftIcon,
-  TagRightIcon,
-  TagCloseButton,
-} from "@chakra-ui/react";
-import api from "../services/api";
+import { Tag } from "@chakra-ui/react";
+import api from "../../services/api";
 import {
   Table,
   Thead,
@@ -27,20 +18,12 @@ import {
   Tr,
   Th,
   Td,
-  TableCaption,
   TableContainer,
 } from "@chakra-ui/react";
-import {
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  MenuDivider,
-} from "@chakra-ui/react";
+import { Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 import { IconButton } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { FiAlertCircle } from "react-icons/fi";
-import { format } from "date-fns";
 import {
   Drawer,
   DrawerBody,
@@ -50,10 +33,8 @@ import {
   DrawerContent,
   DrawerCloseButton,
 } from "@chakra-ui/react";
-import { Input } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/react";
 import { MdDelete } from "react-icons/md";
-
 import {
   Modal,
   ModalOverlay,
@@ -67,60 +48,53 @@ import * as Yup from "yup";
 import { setOriginalNode } from "typescript";
 import { CgArrowsExchangeAltV } from "react-icons/cg";
 
-type ButtonName = "consulta" | "gerenciar";
-
 interface Agendamento {
   id: string;
-  nome: string;
-  sobrenome: string;
-  horarioAgendamento: string;
-  dataNascimento: Date;
-  dataAgendamento: Date;
-  status: boolean;
+  name: string;
+  surname: string;
+  appointmentTime: string;
+  dateOfBirth: Date;
+  appointmentDate: Date;
+  appointmentStatus: boolean;
 }
 
 const Consulta = () => {
-  const [selectedButton, setSelectedButton] = useState<ButtonName>("consulta");
-  const [dataValida, setDataValida] = useState<Date | string>("");
-  const [dataSelecionada, setDataSelecionada] = useState<Date | null>(() => {
-    const storedDate = localStorage.getItem("dataSelecionada");
+  const [validDate, setValidDate] = useState<Date | string>("");
+  const [selectedDate, setSelectedDate] = useState<Date | null>(() => {
+    const storedDate = localStorage.getItem("selectedDate");
     return storedDate ? new Date(storedDate) : null;
   });
-  const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
-  const [agendamentoParaEditar, setAgendamentoParaEditar] = useState<
-    string | null
-  >(null);
-  const [agendamentoParaExcluir, setAgendamentoParaExcluir] = useState<
-    string | null
-  >(null);
-  const [agendamentoIdParaEditar, setAgendamentoIdParaEditar] = useState<
-    string | null
-  >(null);
-  const [selectedAppointment, setSelectedAppointment] =
-    useState<Agendamento | null>(null);
+  const [appointments, setAppointments] = useState<Agendamento[]>([]);
+  const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(
+    null
+  );
+
   const [formData, setFormData] = useState({
     id: "",
-    nome: "",
-    sobrenome: "",
-    dataNascimento: new Date(),
-    status: false,
-    dataAgendamento: new Date(),
-    horarioAgendamento: "",
+    name: "",
+    surname: "",
+    dateOfBirth: new Date(),
+    appointmentStatus: false,
+    appointmentDate: new Date(),
+    appointmentTime: "",
   });
 
   const [selectAll, setSelectAll] = useState(false);
   const [showCheckboxes, setShowCheckboxes] = useState<boolean>(false);
   const [showManageDiv, setShowManageDiv] = useState<boolean>(false);
-  const [selectedStatus, setSelectedStatus] = useState<boolean>(true);
-  const [exibirAgendado, setExibirAgendado] = useState<boolean>(true);
+  const [selectedappointmentStatus, setSelectedappointmentStatus] =
+    useState<boolean>(true);
   const [selectedTime, setSelectedTime] = useState<string>("");
-  const [horariosDisponiveis, setHorariosDisponiveis] = useState<string[]>([]);
-  const [showTimes, setShowTimes] = useState<boolean>(false);
-  const [exibirRealizado, setExibirRealizado] = useState<boolean>(true);
-  const [refresh, setRefresh] = useState<boolean>(false);
-  const [ordenacao, setOrdenacao] = useState(true);
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [showMadeAppointments, setShowMadeAppointments] =
+    useState<boolean>(true);
+  const [showScheduledAppointments, setShowScheduledAppointments] =
+    useState<boolean>(true);
+  const [refreshAppointments, setRefreshAppointments] =
+    useState<boolean>(false);
+  const [order, setOrder] = useState(true);
 
-  const [agendamentosFiltrados, setAgendamentosFiltrados] = useState<
+  const [filteredAppointments, setFilteredAppointments] = useState<
     Agendamento[]
   >([]);
 
@@ -131,54 +105,49 @@ const Consulta = () => {
     const fetchData = async () => {
       try {
         const response = await api.get<Agendamento[]>("/agendamentos");
-        setAgendamentos(response.data);
+        setAppointments(response.data);
       } catch (error) {
         console.error("Erro ao obter agendamentos:", error);
       }
     };
 
     fetchData();
-  }, [refresh]);
+  }, [refreshAppointments]);
 
   useEffect(() => {
-    if (dataSelecionada) {
-      localStorage.setItem("dataSelecionada", dataSelecionada.toISOString());
+    if (selectedDate) {
+      localStorage.setItem("selectedDate", selectedDate.toISOString());
     } else {
-      localStorage.removeItem("dataSelecionada");
+      localStorage.removeItem("selectedDate");
     }
-  }, [dataSelecionada]);
+  }, [selectedDate]);
 
   useEffect(() => {
-    if (dataSelecionada) {
-      const filtrados = agendamentos.filter(
+    if (selectedDate) {
+      const filtered = appointments.filter(
         (agendamento) =>
-          formatarData(agendamento.dataAgendamento) ===
-          formatarData(dataSelecionada)
+          formatDate(agendamento.appointmentDate) === formatDate(selectedDate)
       );
-      setAgendamentosFiltrados(filtrados);
+      setFilteredAppointments(filtered);
     } else {
-      setAgendamentosFiltrados([]);
+      setFilteredAppointments([]);
     }
-  }, [dataSelecionada, agendamentos]);
+  }, [selectedDate, appointments]);
 
   const handleDateChange = (date: Date | null) => {
-    setDataSelecionada(date);
-  };
-
-  const handleSelectAllChange = () => {
-    setSelectAll(!selectAll);
+    setSelectedDate(date);
   };
 
   const countSelectedCheckboxes = () => {
     return checkedItems.filter((item) => item).length;
   };
 
-  const handleExibirAgendado = () => {
-    setExibirAgendado(!exibirAgendado);
+  const handleshowScheduledAppointments = () => {
+    setShowScheduledAppointments(!showScheduledAppointments);
   };
 
-  const handleExibirRealizado = () => {
-    setExibirRealizado(!exibirRealizado);
+  const handleshowMadeAppointments = () => {
+    setShowMadeAppointments(!showMadeAppointments);
   };
 
   const {
@@ -193,27 +162,23 @@ const Consulta = () => {
     onClose: onCloseEditModal,
   } = useDisclosure();
 
-  const handleButtonClick = (buttonName: ButtonName) => {
-    setSelectedButton(buttonName);
-  };
-
-  const agendamentosVisiveis = agendamentosFiltrados.filter((agendamento) => {
-    if (exibirAgendado && agendamento.status) {
+  const visibleAppointments = filteredAppointments.filter((agendamento) => {
+    if (showScheduledAppointments && agendamento.appointmentStatus) {
       return true;
     }
-    if (exibirRealizado && !agendamento.status) {
+    if (showMadeAppointments && !agendamento.appointmentStatus) {
       return true;
     }
     return false;
   });
 
-  const agendamentosOrdenados = [...agendamentosVisiveis].sort((a, b) => {
-    if (ordenacao) {
+  const orderedAppointments = [...visibleAppointments].sort((a, b) => {
+    if (order) {
       // Ordenar por "Agendado"
-      return a.status === true ? -1 : 1; // "Agendado" vem antes de "Realizado"
+      return a.appointmentStatus === true ? -1 : 1; // "Agendado" vem antes de "Realizado"
     } else {
       // Ordenar por "Realizado"
-      return a.status === false ? -1 : 1; // "Realizado" vem antes de "Agendado"
+      return a.appointmentStatus === false ? -1 : 1; // "Realizado" vem antes de "Agendado"
     }
   });
 
@@ -222,44 +187,44 @@ const Consulta = () => {
     setShowManageDiv(true);
   };
 
-  const handleCloseManageDiv = (status: boolean) => {
-    handleCloseAppointment(status);
+  const handleCloseManageDiv = (appointmentStatus: boolean) => {
+    handleCloseAppointment(appointmentStatus);
     setShowManageDiv(false);
     setShowCheckboxes(false);
   };
 
-  const handleCloseAppointment = async (statusEscolhido: boolean) => {
-    const selectedAgendamentos = agendamentosFiltrados.filter(
-      (agendamento, index) => checkedItems[index]
+  const handleCloseAppointment = async (chosedAppointmentStatus: boolean) => {
+    const selectedAppointments = filteredAppointments.filter(
+      (appointment, index) => checkedItems[index]
     );
 
     try {
       // Atualiza no servidor
       await Promise.all(
-        selectedAgendamentos.map(async (agendamento) => {
-          await api.put(`/agendamentos/${agendamento.id}`, {
-            ...agendamento,
-            status: statusEscolhido,
+        selectedAppointments.map(async (appointment) => {
+          await api.put(`/agendamentos/${appointment.id}`, {
+            ...appointment,
+            appointmentStatus: chosedAppointmentStatus,
           });
         })
       );
 
       // Atualiza o estado local imediatamente
-      const updatedAgendamentos = agendamentos.map((agendamento) => {
+      const updatedAppointments = appointments.map((appointment) => {
         if (
-          selectedAgendamentos.some(
-            (selected) => selected.id === agendamento.id
+          selectedAppointments.some(
+            (selected) => selected.id === appointment.id
           )
         ) {
           return {
-            ...agendamento,
-            status: statusEscolhido,
+            ...appointment,
+            appointmentStatus: chosedAppointmentStatus,
           };
         }
-        return agendamento;
+        return appointment;
       });
 
-      setAgendamentos(updatedAgendamentos);
+      setAppointments(updatedAppointments);
 
       onClose(); // Fecha o drawer após salvar
     } catch (error) {
@@ -273,8 +238,8 @@ const Consulta = () => {
 
     if (response.status === 200) {
       // Remove o agendamento excluído do estado
-      setAgendamentos((prevAgendamentos) =>
-        prevAgendamentos.filter((agendamento) => agendamento.id !== id)
+      setAppointments((prevAppointments) =>
+        prevAppointments.filter((appointment) => appointment.id !== id)
       );
       onCloseDeleteModal();
     } else {
@@ -293,26 +258,26 @@ const Consulta = () => {
       const hoje = new Date(); // Obtém a data atual
 
       // Verifica se a data de agendamento é anterior à data atual
-      let statusAgendamento;
-      if (values.dataAgendamento != null && values.dataAgendamento < hoje) {
-        statusAgendamento = false; // Define status como false se for anterior
+      let appointmentStatusAgendamento;
+      if (values.appointmentDate != null && values.appointmentDate < hoje) {
+        appointmentStatusAgendamento = false; // Define appointmentStatus como false se for anterior
       } else {
-        statusAgendamento = values.status; // Caso contrário, mantém como true
+        appointmentStatusAgendamento = values.appointmentStatus; // Caso contrário, mantém como true
       }
 
       // Enviando os dados para a API
       const response = await api.put(`/agendamentos/${id}`, {
-        nome: values.nome,
-        sobrenome: values.sobrenome,
-        dataNascimento: values.dataNascimento,
-        dataAgendamento: values.dataAgendamento,
-        horarioAgendamento: values.horarioAgendamento,
-        status: statusAgendamento,
+        name: values.name,
+        surname: values.surname,
+        dateOfBirth: values.dateOfBirth,
+        appointmentDate: values.appointmentDate,
+        appointmentTime: values.appointmentTime,
+        appointmentStatus: appointmentStatusAgendamento,
       });
 
       // Verificando se a resposta foi bem sucedida
       if (response.status === 200) {
-        setAgendamentos((prevAppointments) =>
+        setAppointments((prevAppointments) =>
           prevAppointments.map((appointment) =>
             appointment.id === id ? { ...appointment, ...values } : appointment
           )
@@ -322,7 +287,7 @@ const Consulta = () => {
         alert("Erro!");
         console.error();
       }
-      setRefresh((prev) => !prev);
+      setRefreshAppointments((prev) => !prev);
     } catch (error) {
       alert("Erro!");
     }
@@ -330,26 +295,24 @@ const Consulta = () => {
 
   // Função para lidar com o envio do formulário
 
-  const formatarData = (data: any) => {
+  const formatDate = (data: any) => {
     const dataObj = new Date(data);
     if (isNaN(dataObj.getTime())) {
-      return ""; // Retorna uma string vazia se a data for inválida
+      return "";
     }
     return dataObj.toLocaleDateString("pt-BR");
   };
 
-  const initialCheckedItems = Array(agendamentosFiltrados.length).fill(false);
+  const initialCheckedItems = Array(filteredAppointments.length).fill(false);
   const [checkedItems, setCheckedItems] = React.useState(initialCheckedItems);
 
   const handleCheckboxChange = (index: number) => {
     const newCheckedItems = [...checkedItems];
     newCheckedItems[index] = !newCheckedItems[index];
 
-    // Se o índice for 0 (primeiro checkbox filho), atualize diretamente
     if (index === 0) {
       setCheckedItems(newCheckedItems);
     } else {
-      // Caso contrário, mantenha a lógica anterior
       setCheckedItems(newCheckedItems);
     }
   };
@@ -357,51 +320,32 @@ const Consulta = () => {
   const handleDataChange = async (date: Date) => {
     try {
       await Yup.object({
-        dataAgendamento: AgendamentoSchema.fields.dataAgendamento,
-      }).validate({ dataAgendamento: date });
-      setDataValida(date);
+        appointmentDate: AppointmentSchema.fields.appointmentDate,
+      }).validate({ appointmentDate: date });
+      setValidDate(date);
     } catch (err) {
-      setDataValida("");
+      setValidDate("");
     }
   };
 
   useEffect(() => {
-    // Buscar horários disponíveis quando a data de agendamento mudar
-    if (formData.dataAgendamento) {
-      fetchHorariosDisponiveis();
+    if (formData.appointmentDate) {
+      fetchavailableTimes();
     }
-  }, [formData.dataAgendamento]);
+  }, [formData.appointmentDate]);
 
-  const fetchHorariosDisponiveis = async () => {
+  const fetchavailableTimes = async () => {
     try {
       const response = await api.get("/horarios-disponiveis", {
         params: {
-          dataAgendamento: formData.dataAgendamento,
+          appointmentDate: formData.appointmentDate,
         },
       });
-      setHorariosDisponiveis(response.data);
+      setAvailableTimes(response.data);
     } catch (error) {
       console.error("Erro ao buscar horários disponíveis:", error);
     }
   };
-
-  const formatarDados = () => {
-    // const anoNascimento = formData.dataNascimento.getFullYear(); // 1990
-    // const mesNascimento = formData.dataNascimento.getMonth(); // 0 (Janeiro, índice 0)
-    // const diaNascimento = formData.dataNascimento.getDate();
-
-    // const anoAgendamento = formData.dataAgendamento.getFullYear(); // 1990
-    // const mesAgendamento = formData.dataAgendamento.getMonth(); // 0 (Janeiro, índice 0)
-    // const diaAgendamento = formData.dataAgendamento.getDate();
-
-    setFormData({
-      ...formData,
-      dataNascimento: new Date(0, 0, 0),
-      dataAgendamento: new Date(0, 0, 0),
-    });
-  };
-
-  const mapTest = agendamentosFiltrados.length + 1;
 
   const allChecked = checkedItems.every(Boolean);
   const isIndeterminate = checkedItems.some(Boolean) && !allChecked;
@@ -433,9 +377,9 @@ const Consulta = () => {
         <div className="px-10 pt-10">
           <div className="flex flex-row gap-4 justify-start items-center">
             <DatePicker
-              selected={dataSelecionada}
+              selected={selectedDate}
               onChange={handleDateChange}
-              id="dataAgendamento"
+              id="appointmentDate"
               dateFormat="dd/MM/yyyy"
               locale="ptBR"
               placeholderText="dd/mm/aaaa"
@@ -476,16 +420,20 @@ const Consulta = () => {
                       <Button
                         variant="outline"
                         borderRadius="20px"
-                        colorScheme={selectedStatus === true ? "green" : "gray"}
-                        onClick={() => setSelectedStatus(true)}
+                        colorScheme={
+                          selectedappointmentStatus === true ? "green" : "gray"
+                        }
+                        onClick={() => setSelectedappointmentStatus(true)}
                       >
                         Agendado
                       </Button>
                       <Button
                         variant="outline"
                         borderRadius="20px"
-                        colorScheme={selectedStatus === false ? "red" : "gray"}
-                        onClick={() => setSelectedStatus(false)}
+                        colorScheme={
+                          selectedappointmentStatus === false ? "red" : "gray"
+                        }
+                        onClick={() => setSelectedappointmentStatus(false)}
                       >
                         Realizado
                       </Button>
@@ -501,7 +449,9 @@ const Consulta = () => {
                       </Button>
                       <Button
                         colorScheme="primary"
-                        onClick={() => handleCloseManageDiv(selectedStatus)}
+                        onClick={() =>
+                          handleCloseManageDiv(selectedappointmentStatus)
+                        }
                       >
                         Confirmar
                       </Button>
@@ -510,21 +460,21 @@ const Consulta = () => {
                 </div>
               )}
               <div className="flex flex-row gap-2 justify-between items-center">
-                {dataSelecionada ? (
+                {selectedDate ? (
                   <div>
                     <span className="font-semibold">
-                      {agendamentosFiltrados.length > 0 ? (
+                      {filteredAppointments.length > 0 ? (
                         <div>
                           <span>
-                            {agendamentosFiltrados.length}{" "}
-                            {agendamentosFiltrados.length > 1
+                            {filteredAppointments.length}{" "}
+                            {filteredAppointments.length > 1
                               ? "resultados"
                               : "resultado"}{" "}
                           </span>
                           <span className="pr-1">para</span>
                           <span className="font-semibold text-[#5570F1]">
-                            {dataSelecionada
-                              ? dataSelecionada.toLocaleDateString()
+                            {selectedDate
+                              ? selectedDate.toLocaleDateString()
                               : " "}
                           </span>
                         </div>
@@ -552,7 +502,7 @@ const Consulta = () => {
                           <Checkbox
                             defaultChecked
                             colorScheme="primary"
-                            onChange={handleExibirAgendado}
+                            onChange={handleshowScheduledAppointments}
                           >
                             Agendado
                           </Checkbox>
@@ -561,7 +511,7 @@ const Consulta = () => {
                           <Checkbox
                             defaultChecked
                             colorScheme="primary"
-                            onChange={handleExibirRealizado}
+                            onChange={handleshowMadeAppointments}
                           >
                             Realizado
                           </Checkbox>
@@ -584,7 +534,7 @@ const Consulta = () => {
                             isIndeterminate={isIndeterminate}
                             onChange={(e) =>
                               setCheckedItems(
-                                Array(agendamentosFiltrados.length).fill(
+                                Array(filteredAppointments.length).fill(
                                   e.target.checked
                                 )
                               )
@@ -606,7 +556,7 @@ const Consulta = () => {
                           color="#4A5568"
                           rightIcon={<CgArrowsExchangeAltV size={14} />}
                           onClick={() => {
-                            setOrdenacao(!ordenacao);
+                            setOrder(!order);
                           }}
                         >
                           situação
@@ -617,7 +567,7 @@ const Consulta = () => {
                     </Tr>
                   </Thead>
                   <Tbody className="rounded-lg">
-                    {agendamentosOrdenados.map((agendamento, index) => (
+                    {orderedAppointments.map((agendamento, index) => (
                       <Tr key={index}>
                         <Td>
                           {showCheckboxes && (
@@ -628,11 +578,11 @@ const Consulta = () => {
                             ></Checkbox>
                           )}
                         </Td>
-                        <Td>{agendamento.nome}</Td>
-                        <Td>{agendamento.sobrenome}</Td>
-                        <Td>{formatarData(agendamento.dataNascimento)}</Td>
-                        <Td>{formatarData(agendamento.dataAgendamento)}</Td>
-                        <Td>{agendamento.horarioAgendamento}</Td>
+                        <Td>{agendamento.name}</Td>
+                        <Td>{agendamento.surname}</Td>
+                        <Td>{formatDate(agendamento.dateOfBirth)}</Td>
+                        <Td>{formatDate(agendamento.appointmentDate)}</Td>
+                        <Td>{agendamento.appointmentTime}</Td>
                         <Td>
                           <HStack spacing={4}>
                             <Tag
@@ -640,10 +590,14 @@ const Consulta = () => {
                               borderRadius="full"
                               variant="outline"
                               colorScheme={
-                                agendamento.status ? "success" : "red"
+                                agendamento.appointmentStatus
+                                  ? "success"
+                                  : "red"
                               }
                             >
-                              {agendamento.status ? "Agendado" : "Realizado"}
+                              {agendamento.appointmentStatus
+                                ? "Agendado"
+                                : "Realizado"}
                             </Tag>
                           </HStack>
                         </Td>
@@ -653,7 +607,7 @@ const Consulta = () => {
                             icon={<MdDelete size={20} color="#FF4949" />}
                             bg="none"
                             onClick={() => {
-                              setAgendamentoParaExcluir(agendamento.id);
+                              setAppointmentToDelete(agendamento.id);
                               onOpenDeleteModal();
                             }}
                           />
@@ -664,34 +618,34 @@ const Consulta = () => {
                             icon={<FaEdit size={20} color="#5570F1" />}
                             bg="none"
                             onClick={() => {
-                              const dataAgendamento = new Date(
-                                agendamento.dataAgendamento
+                              const appointmentDate = new Date(
+                                agendamento.appointmentDate
                               );
-                              const dataNascimento = new Date(
-                                agendamento.dataNascimento
+                              const dateOfBirth = new Date(
+                                agendamento.dateOfBirth
                               );
-                              const anoNascimento =
-                                dataNascimento.getFullYear();
-                              const mesNascimento = dataNascimento.getMonth();
-                              const diaNascimento = dataNascimento.getDate();
+                              const birthYear = dateOfBirth.getFullYear();
+                              const birthMonth = dateOfBirth.getMonth();
+                              const birthDay = dateOfBirth.getDate();
 
-                              const anoAgendamento =
-                                dataAgendamento.getFullYear();
-                              const mesAgendamento = dataAgendamento.getMonth();
-                              const diaAgendamento = dataAgendamento.getDate();
+                              const appointmentYear =
+                                appointmentDate.getFullYear();
+                              const appointmentMonth =
+                                appointmentDate.getMonth();
+                              const appointmentDay = appointmentDate.getDate();
 
                               setFormData({
                                 ...agendamento,
-                                dataNascimento: new Date(
-                                  anoNascimento,
-                                  mesNascimento,
-                                  diaNascimento
+                                dateOfBirth: new Date(
+                                  birthYear,
+                                  birthMonth,
+                                  birthDay
                                 ),
 
-                                dataAgendamento: new Date(
-                                  anoAgendamento,
-                                  mesAgendamento,
-                                  diaAgendamento
+                                appointmentDate: new Date(
+                                  appointmentYear,
+                                  appointmentMonth,
+                                  appointmentDay
                                 ),
                               });
                               onOpenEditModal();
@@ -745,8 +699,8 @@ const Consulta = () => {
                   variant="solid"
                   colorScheme="red"
                   onClick={() => {
-                    if (agendamentoParaExcluir) {
-                      handleDeleteAppointment(agendamentoParaExcluir);
+                    if (appointmentToDelete) {
+                      handleDeleteAppointment(appointmentToDelete);
                     }
                   }}
                 >
@@ -767,7 +721,7 @@ const Consulta = () => {
               <ModalBody>
                 <Formik
                   initialValues={formData}
-                  validationSchema={AgendamentoSchema}
+                  validationSchema={AppointmentSchema}
                   onSubmit={handleEditAppointment}
                 >
                   {({ handleChange, setFieldValue }) => (
@@ -778,21 +732,21 @@ const Consulta = () => {
                             <div>
                               <div className="flex flex-col w-full pt-2 gap-1">
                                 <label
-                                  htmlFor="nome"
+                                  htmlFor="name"
                                   className="text-sm text-[#5E6366]"
                                 >
                                   Nome
                                 </label>
                                 <Field
-                                  name="nome"
-                                  id="nome"
+                                  name="name"
+                                  id="name"
                                   onChange={(
                                     e: React.ChangeEvent<HTMLInputElement>
                                   ) => {
                                     handleChange(e);
                                     setFormData((prevValues) => ({
                                       ...prevValues,
-                                      nome: e.target.value,
+                                      name: e.target.value,
                                     }));
                                   }}
                                   placeholder="Nome"
@@ -800,46 +754,46 @@ const Consulta = () => {
                                   required
                                 />
                                 <ErrorMessage
-                                  name="nome"
+                                  name="name"
                                   component={ErrorStyled}
                                 />
                               </div>
                               <div className="flex flex-col pt-2 gap-1">
                                 <label
-                                  htmlFor="sobrenome"
+                                  htmlFor="surname"
                                   className="text-sm text-[#5E6366] focus:outline-none focus:none focus:none focus:border-transparent"
                                 >
                                   Sobrenome
                                 </label>
                                 <Field
-                                  name="sobrenome"
-                                  id="sobrenome"
+                                  name="surname"
+                                  id="surname"
                                   onChange={(
                                     e: React.ChangeEvent<HTMLInputElement>
                                   ) => {
                                     handleChange(e);
                                     setFormData((prevValues) => ({
                                       ...prevValues,
-                                      sobrenome: e.target.value,
+                                      surname: e.target.value,
                                     }));
                                   }}
-                                  placeholder="Sobrenome"
+                                  placeholder="surname"
                                   className="rounded-lg py-3 px-4 bg-[#EFF1F9] focus:outline-none focus:none focus:none focus:border-transparent"
                                   required
                                 />
                                 <ErrorMessage
-                                  name="sobrenome"
+                                  name="surname"
                                   component={ErrorStyled}
                                 />
                               </div>
                               <div className="flex flex-col pt-2 gap-1">
                                 <label
-                                  htmlFor="dataNascimento"
+                                  htmlFor="dateOfBirth"
                                   className="text-sm text-[#5E6366]"
                                 >
                                   Data de nascimento
                                 </label>
-                                <Field name="dataNascimento" required>
+                                <Field name="dateOfBirth" required>
                                   {({
                                     field,
                                     form,
@@ -849,7 +803,7 @@ const Consulta = () => {
                                   }) => (
                                     <DatePicker
                                       {...field}
-                                      id="dataNascimento"
+                                      id="dateOfBirth"
                                       selected={field.value}
                                       dateFormat="dd/MM/yyyy"
                                       placeholderText="dd/mm/aaaa"
@@ -860,13 +814,10 @@ const Consulta = () => {
                                       dropdownMode="select"
                                       scrollableYearDropdown
                                       onChange={(date: Date) => {
-                                        form.setFieldValue(
-                                          "dataNascimento",
-                                          date
-                                        );
+                                        form.setFieldValue("dateOfBirth", date);
                                         setFormData((prevValues) => ({
                                           ...prevValues,
-                                          dataNascimento: date,
+                                          dateOfBirth: date,
                                         }));
                                       }}
                                       className="rounded-lg py-3 w-full px-4 bg-[#EFF1F9] focus:outline-none"
@@ -874,18 +825,18 @@ const Consulta = () => {
                                   )}
                                 </Field>
                                 <ErrorMessage
-                                  name="dataNascimento"
+                                  name="dateOfBirth"
                                   component={ErrorStyled}
                                 />
                               </div>
                               <div className="flex flex-col gap-1 pt-2">
                                 <label
-                                  htmlFor="status"
+                                  htmlFor="appointmentStatus"
                                   className="text-sm text-[#5E6366]"
                                 >
                                   Situação
                                 </label>
-                                <Field name="status" required>
+                                <Field name="appointmentStatus" required>
                                   {({ field }: { field: any }) => (
                                     <Menu>
                                       <MenuButton
@@ -917,7 +868,10 @@ const Consulta = () => {
                                       <MenuList>
                                         <MenuItem
                                           onClick={() =>
-                                            setFieldValue("status", true)
+                                            setFieldValue(
+                                              "appointmentStatus",
+                                              true
+                                            )
                                           }
                                         >
                                           Agendado
@@ -925,7 +879,10 @@ const Consulta = () => {
 
                                         <MenuItem
                                           onClick={() =>
-                                            setFieldValue("status", false)
+                                            setFieldValue(
+                                              "appointmentStatus",
+                                              false
+                                            )
                                           }
                                         >
                                           Realizado
@@ -938,12 +895,12 @@ const Consulta = () => {
                               <div className="flex flex-row gap-4 pt-2 ">
                                 <div className="flex flex-col w-1/2 gap-1">
                                   <label
-                                    htmlFor="dataAgendamento"
+                                    htmlFor="appointmentDate"
                                     className="text-sm text-[#5E6366]"
                                   >
                                     Data de Agendamento
                                   </label>
-                                  <Field name="dataAgendamento" required>
+                                  <Field name="appointmentDate" required>
                                     {({
                                       field,
                                       form,
@@ -953,7 +910,7 @@ const Consulta = () => {
                                     }) => (
                                       <DatePicker
                                         {...field}
-                                        id="dataAgendamento"
+                                        id="appointmentDate"
                                         selected={field.value}
                                         dateFormat="dd/MM/yyyy"
                                         placeholderText="dd/mm/aaaa"
@@ -965,13 +922,13 @@ const Consulta = () => {
                                         scrollableYearDropdown
                                         onChange={(date: Date) => {
                                           form.setFieldValue(
-                                            "dataAgendamento",
+                                            "appointmentDate",
                                             date
                                           );
                                           handleDataChange(date);
                                           setFormData((prevValues) => ({
                                             ...prevValues,
-                                            dataAgendamento: date,
+                                            appointmentDate: date,
                                           }));
                                           onOpen();
                                         }}
@@ -980,18 +937,18 @@ const Consulta = () => {
                                     )}
                                   </Field>
                                   <ErrorMessage
-                                    name="dataAgendamento"
+                                    name="appointmentDate"
                                     component={ErrorStyled}
                                   />
                                 </div>
                                 <div className="flex flex-col w-1/2 gap-1">
                                   <label
-                                    htmlFor="horarioAgendamento"
+                                    htmlFor="appointmentTime"
                                     className="text-sm text-[#5E6366]"
                                   >
                                     Horário de Agendamento
                                   </label>
-                                  <Field name="horarioAgendamento" required>
+                                  <Field name="appointmentTime" required>
                                     {({
                                       field,
                                       form,
@@ -1017,7 +974,7 @@ const Consulta = () => {
                                     )}
                                   </Field>
                                   <ErrorMessage
-                                    name="horarioAgendamento"
+                                    name="appointmentTime"
                                     component={ErrorStyled}
                                   />
                                 </div>
@@ -1036,24 +993,20 @@ const Consulta = () => {
 
                                   <DrawerBody>
                                     <Stack spacing="24px">
-                                      {horariosDisponiveis.map(
-                                        (time, index) => (
-                                          <Button
-                                            key={index}
-                                            width="full"
-                                            colorScheme={
-                                              time === selectedTime
-                                                ? "primary"
-                                                : "gray"
-                                            }
-                                            onClick={() =>
-                                              setSelectedTime(time)
-                                            }
-                                          >
-                                            {time}
-                                          </Button>
-                                        )
-                                      )}
+                                      {availableTimes.map((time, index) => (
+                                        <Button
+                                          key={index}
+                                          width="full"
+                                          colorScheme={
+                                            time === selectedTime
+                                              ? "primary"
+                                              : "gray"
+                                          }
+                                          onClick={() => setSelectedTime(time)}
+                                        >
+                                          {time}
+                                        </Button>
+                                      ))}
                                     </Stack>
                                   </DrawerBody>
 
@@ -1069,12 +1022,12 @@ const Consulta = () => {
                                       colorScheme="primary"
                                       onClick={() => {
                                         setFieldValue(
-                                          "horarioAgendamento",
+                                          "appointmentTime",
                                           selectedTime
                                         );
                                         setFormData((prevValues) => ({
                                           ...prevValues,
-                                          horarioAgendamento: selectedTime,
+                                          appointmentTime: selectedTime,
                                         }));
                                         onClose();
                                       }}

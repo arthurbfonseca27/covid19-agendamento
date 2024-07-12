@@ -1,36 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import { AgendamentoSchema } from "../validation/Agendamento";
+import { AppointmentSchema } from "../../validation/AppointmentSchema";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Button } from "@chakra-ui/react";
 import styled from "styled-components";
-import { useDispatch } from "react-redux";
-import useModal from "../hooks/useModal";
+import useModal from "../../hooks/useModal";
 import { MdError } from "react-icons/md";
-import axios from "axios";
-import api from "../services/api";
-import {
-  Step,
-  StepDescription,
-  StepIcon,
-  StepIndicator,
-  StepNumber,
-  StepSeparator,
-  StepStatus,
-  StepTitle,
-  Stepper,
-  useSteps,
-} from "@chakra-ui/react";
+import api from "../../services/api";
 import { FaCheckCircle } from "react-icons/fa";
 import * as Yup from "yup";
-import {
-  setNome,
-  setSobrenome,
-  setDataNascimento,
-  setDataAgendamento,
-  setHorario,
-} from "../redux/pessoaSlice";
 import { Link, useNavigate } from "react-router-dom";
 import {
   useDisclosure,
@@ -45,35 +24,35 @@ import {
 } from "@chakra-ui/react";
 
 interface FormValues {
-  nome: string;
-  sobrenome: string;
-  dataNascimento: Date | null;
-  dataAgendamento: Date | null;
-  horarioAgendamento: string;
+  name: string;
+  surname: string;
+  dateOfBirth: Date | null;
+  appointmentDate: Date | null;
+  appointmentTime: string;
 }
 
 const Agendamento = () => {
-  const [dataValida, setDataValida] = useState<Date | string>("");
-  const [statusAgendamento, setStatusAgendamento] = useState<Boolean>(true);
-  const [horariosDisponiveis, setHorariosDisponiveis] = useState<string[]>([]);
+  const [validDate, setValidDate] = useState<Date | string>("");
+  const [appointmentStatus, setAppointmentStatus] = useState<Boolean>(true);
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [formValues, setFormValues] = useState<FormValues>(() => {
     const data = localStorage.getItem("formValues");
     if (data) {
       const storedValues = JSON.parse(data) as FormValues;
-      storedValues.dataNascimento = storedValues.dataNascimento
-        ? new Date(storedValues.dataNascimento)
+      storedValues.dateOfBirth = storedValues.dateOfBirth
+        ? new Date(storedValues.dateOfBirth)
         : null;
-      storedValues.dataAgendamento = storedValues.dataAgendamento
-        ? new Date(storedValues.dataAgendamento)
+      storedValues.appointmentDate = storedValues.appointmentDate
+        ? new Date(storedValues.appointmentDate)
         : null;
       return storedValues;
     } else {
       return {
-        nome: "",
-        sobrenome: "",
-        dataNascimento: null,
-        dataAgendamento: null,
-        horarioAgendamento: "",
+        name: "",
+        surname: "",
+        dateOfBirth: null,
+        appointmentDate: null,
+        appointmentTime: "",
       };
     }
   });
@@ -82,44 +61,19 @@ const Agendamento = () => {
     localStorage.setItem("formValues", JSON.stringify(formValues));
   }, [formValues]);
 
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = async (values: FormValues) => {
     try {
-      // Despachando as ações para atualizar o estado no Redux
-      dispatch(setNome(values.nome));
-      dispatch(setSobrenome(values.sobrenome));
-      if (values.dataNascimento) {
-        dispatch(setDataNascimento(values.dataNascimento.toLocaleDateString()));
-      }
-      if (values.dataAgendamento) {
-        dispatch(
-          setDataAgendamento(values.dataAgendamento.toLocaleDateString())
-        );
-      }
-      dispatch(setHorario(values.horarioAgendamento));
-
-      const hoje = new Date(); // Obtém a data atual
-
-      // Verifica se a data de agendamento é anterior à data atual
-      if (values.dataAgendamento != null && values.dataAgendamento < hoje) {
-        setStatusAgendamento(false); // Define status como false se for anterior
-      } else {
-        setStatusAgendamento(true); // Caso contrário, mantém como true
-      }
-
-      // Enviando os dados para a API
       const response = await api.post("/agendamentos", {
-        nome: values.nome,
-        sobrenome: values.sobrenome,
-        dataNascimento: values.dataNascimento,
-        dataAgendamento: values.dataAgendamento,
-        horarioAgendamento: values.horarioAgendamento,
-        status: statusAgendamento,
+        name: values.name,
+        surname: values.surname,
+        dateOfBirth: values.dateOfBirth,
+        appointmentDate: values.appointmentDate,
+        appointmentTime: values.appointmentTime,
+        appointmentStatus: true,
       });
 
-      // Verificando se a resposta foi bem sucedida
       if (response.status === 200) {
         handlerShowCorrectModal();
         navigate("/");
@@ -153,11 +107,11 @@ const Agendamento = () => {
 
   const handlerShowErrorModal = (error: string) => {
     setFormValues({
-      nome: "",
-      sobrenome: "",
-      dataNascimento: null,
-      dataAgendamento: null,
-      horarioAgendamento: "",
+      name: "",
+      surname: "",
+      dateOfBirth: null,
+      appointmentDate: null,
+      appointmentTime: "",
     });
 
     showModal({
@@ -171,34 +125,34 @@ const Agendamento = () => {
   const handleDataChange = async (date: Date) => {
     try {
       await Yup.object({
-        dataAgendamento: AgendamentoSchema.fields.dataAgendamento,
-      }).validate({ dataAgendamento: date });
-      setDataValida(date);
+        appointmentDate: AppointmentSchema.fields.appointmentDate,
+      }).validate({ appointmentDate: date });
+      setValidDate(date);
       console.log("Data válida:", date);
     } catch (err) {
-      setDataValida("");
+      setValidDate("");
       console.log(err);
       console.log(date);
-      console.log({ dataAgendamento: date });
+      console.log({ appointmentDate: date });
       console.log("Data inválida");
     }
   };
 
   useEffect(() => {
     // Buscar horários disponíveis quando a data de agendamento mudar
-    if (formValues.dataAgendamento) {
-      fetchHorariosDisponiveis();
+    if (formValues.appointmentDate) {
+      fetchavailableTimes();
     }
-  }, [formValues.dataAgendamento]);
+  }, [formValues.appointmentDate]);
 
-  const fetchHorariosDisponiveis = async () => {
+  const fetchavailableTimes = async () => {
     try {
       const response = await api.get("/horarios-disponiveis", {
         params: {
-          dataAgendamento: formValues.dataAgendamento?.toISOString(),
+          appointmentDate: formValues.appointmentDate?.toISOString(),
         },
       });
-      setHorariosDisponiveis(response.data);
+      setAvailableTimes(response.data);
     } catch (error) {
       console.error("Erro ao buscar horários disponíveis:", error);
     }
@@ -210,73 +164,73 @@ const Agendamento = () => {
   return (
     <div className="bg-[#F9F9FC] min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center justify-center w-1/2 h-1/2 bg-[#FFFFFF] py-8 rounded-3xl border border-[#DDE2E5]">
-        <p className="flex pl-10 justify-start items-start text-2xl w-full pb-1 pt-1 font-redHatDisplay">
+        <p className="flex pl-10 justify-start items-start text-2xl w-full pb-1 pt-1">
           Informações do paciente
         </p>
         <div className="flex flex-row gap-1 text-sm pb-9 justify-end items-end w-full px-10"></div>
         <Formik
           initialValues={formValues}
-          validationSchema={AgendamentoSchema}
+          validationSchema={AppointmentSchema}
           onSubmit={handleSubmit}
         >
           {({ handleChange, setFieldValue }) => (
             <Form className="w-full px-10">
               <div className="flex flex-col gap-6 ">
                 <div className="flex flex-col w-full">
-                  <label htmlFor="nome" className="text-sm text-[#5E6366]">
+                  <label htmlFor="name" className="text-sm text-[#5E6366]">
                     Nome
                   </label>
                   <Field
-                    name="nome"
-                    id="nome"
+                    name="name"
+                    id="name"
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       handleChange(e);
                       setFormValues((prevValues) => ({
                         ...prevValues,
-                        nome: e.target.value,
+                        name: e.target.value,
                       }));
                     }}
                     placeholder="Nome"
                     className="rounded-lg px-4 py-3 bg-[#EFF1F9] w-full focus:outline-none focus:none focus:none focus:border-transparent"
                     required
                   />
-                  <ErrorMessage name="nome" component={ErrorStyled} />
+                  <ErrorMessage name="name" component={ErrorStyled} />
                 </div>
                 <div className="flex flex-col">
                   <label
-                    htmlFor="sobrenome"
+                    htmlFor="surname"
                     className="text-sm text-[#5E6366] focus:outline-none focus:none focus:none focus:border-transparent"
                   >
                     Sobrenome
                   </label>
                   <Field
-                    name="sobrenome"
-                    id="sobrenome"
+                    name="surname"
+                    id="surname"
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       handleChange(e);
                       setFormValues((prevValues) => ({
                         ...prevValues,
-                        sobrenome: e.target.value,
+                        surname: e.target.value,
                       }));
                     }}
                     placeholder="Sobrenome"
                     className="rounded-lg py-3 px-4 bg-[#EFF1F9] focus:outline-none focus:none focus:none focus:border-transparent"
                     required
                   />
-                  <ErrorMessage name="sobrenome" component={ErrorStyled} />
+                  <ErrorMessage name="surname" component={ErrorStyled} />
                 </div>
                 <div className="flex flex-col">
                   <label
-                    htmlFor="dataNascimento"
+                    htmlFor="dateOfBirth"
                     className="text-sm text-[#5E6366]"
                   >
                     Data de nascimento
                   </label>
-                  <Field name="dataNascimento" required>
+                  <Field name="dateOfBirth" required>
                     {({ field, form }: { field: any; form: any }) => (
                       <DatePicker
                         {...field}
-                        id="dataNascimento"
+                        id="dateOfBirth"
                         selected={field.value}
                         dateFormat="dd/MM/yyyy"
                         placeholderText="dd/mm/aaaa"
@@ -287,32 +241,32 @@ const Agendamento = () => {
                         dropdownMode="select"
                         scrollableYearDropdown
                         onChange={(date: Date) => {
-                          form.setFieldValue("dataNascimento", date);
+                          form.setFieldValue("dateOfBirth", date);
                           setFormValues((prevValues) => ({
                             ...prevValues,
-                            dataNascimento: date,
+                            dateOfBirth: date,
                           }));
                         }}
                         className="rounded-lg py-3 w-full px-4 bg-[#EFF1F9] focus:outline-none"
                       />
                     )}
                   </Field>
-                  <ErrorMessage name="dataNascimento" component={ErrorStyled} />
+                  <ErrorMessage name="dateOfBirth" component={ErrorStyled} />
                 </div>
                 <div className="flex flex-col gap-6 ">
                   <div className="flex flex-row gap-8">
                     <div className="flex flex-col w-1/2">
                       <label
-                        htmlFor="dataAgendamento"
+                        htmlFor="appointmentDate"
                         className="text-sm text-[#5E6366]"
                       >
                         Data de Agendamento
                       </label>
-                      <Field name="dataAgendamento" required>
+                      <Field name="appointmentDate" required>
                         {({ field, form }: { field: any; form: any }) => (
                           <DatePicker
                             {...field}
-                            id="dataAgendamento"
+                            id="appointmentDate"
                             selected={field.value}
                             dateFormat="dd/MM/yyyy"
                             placeholderText="dd/mm/aaaa"
@@ -323,11 +277,11 @@ const Agendamento = () => {
                             dropdownMode="select"
                             scrollableYearDropdown
                             onChange={(date: Date) => {
-                              form.setFieldValue("dataAgendamento", date);
+                              form.setFieldValue("appointmentDate", date);
                               handleDataChange(date);
                               setFormValues((prevValues) => ({
                                 ...prevValues,
-                                dataAgendamento: date,
+                                appointmentDate: date,
                               }));
                               onOpen();
                             }}
@@ -336,60 +290,60 @@ const Agendamento = () => {
                         )}
                       </Field>
                       <ErrorMessage
-                        name="dataAgendamento"
+                        name="appointmentDate"
                         component={ErrorStyled}
                       />
                     </div>
                     <div className="flex flex-col w-1/2">
                       <label
-                        htmlFor="horarioAgendamento"
+                        htmlFor="appointmentTime"
                         className="text-sm text-[#5E6366]"
                       >
                         Horário de Agendamento
                       </label>
-                      <Field name="horarioAgendamento" required>
+                      <Field name="appointmentTime" required>
                         {({ field, form }: { field: any; form: any }) => (
                           <div className="rounded-lg py-1 bg-[#EFF1F9] focus:outline-none">
                             <Button
                               onClick={
-                                formValues.dataAgendamento ? onOpen : () => {}
+                                formValues.appointmentDate ? onOpen : () => {}
                               }
                               width="full"
                               color={
-                                formValues.horarioAgendamento
+                                formValues.appointmentTime
                                   ? "#000000"
                                   : "#ABAFB1"
                               }
                               fontWeight="normal"
                               _hover={{ bg: "#EFF1F9" }}
                             >
-                              {formValues.horarioAgendamento
-                                ? formValues.horarioAgendamento
+                              {formValues.appointmentTime
+                                ? formValues.appointmentTime
                                 : "00:00"}
                             </Button>
                           </div>
                         )}
                       </Field>
                       <ErrorMessage
-                        name="horarioAgendamento"
+                        name="appointmentTime"
                         component={ErrorStyled}
                       />
                     </div>
                   </div>
 
-                  {dataValida &&
-                    formValues.dataAgendamento &&
-                    formValues.horarioAgendamento && (
+                  {validDate &&
+                    formValues.appointmentDate &&
+                    formValues.appointmentTime && (
                       <div className="gap-1 w-full">
                         <span className="pr-1">
                           Data e horário do agendamento:
                         </span>
                         <span className="font-bold text-[#5570F1]">
-                          {formValues.dataAgendamento.toLocaleDateString()}{" "}
+                          {formValues.appointmentDate.toLocaleDateString()}{" "}
                         </span>
                         <span className="pr-1">às</span>
                         <span className="font-bold text-[#5570F1]">
-                          {formValues.horarioAgendamento}
+                          {formValues.appointmentTime}
                         </span>
                       </div>
                     )}
@@ -403,7 +357,7 @@ const Agendamento = () => {
 
                       <DrawerBody>
                         <Stack spacing="24px">
-                          {horariosDisponiveis.map((time, index) => (
+                          {availableTimes.map((time, index) => (
                             <Button
                               key={index}
                               width="full"
@@ -425,10 +379,10 @@ const Agendamento = () => {
                         <Button
                           colorScheme="primary"
                           onClick={() => {
-                            setFieldValue("horarioAgendamento", selectedTime);
+                            setFieldValue("appointmentTime", selectedTime);
                             setFormValues((prevValues) => ({
                               ...prevValues,
-                              horarioAgendamento: selectedTime,
+                              appointmentTime: selectedTime,
                             }));
                             onClose();
                           }}
