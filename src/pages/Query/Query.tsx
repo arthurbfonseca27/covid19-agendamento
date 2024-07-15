@@ -58,7 +58,7 @@ interface Agendamento {
   appointmentStatus: boolean;
 }
 
-const Consulta = () => {
+const Query = () => {
   const [validDate, setValidDate] = useState<Date | string>("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(() => {
     const storedDate = localStorage.getItem("selectedDate");
@@ -1085,4 +1085,4 @@ const Consulta = () => {
   );
 };
 
-export default Consulta;
+export default Query;

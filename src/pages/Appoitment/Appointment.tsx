@@ -31,7 +31,7 @@ interface FormValues {
   appointmentTime: string;
 }
 
-const Agendamento = () => {
+const Appointment = () => {
   const [validDate, setValidDate] = useState<Date | string>("");
   const [appointmentStatus, setAppointmentStatus] = useState<Boolean>(true);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
@@ -427,4 +427,4 @@ const Agendamento = () => {
   );
 };
 
-export default Agendamento;
+export default Appointment;

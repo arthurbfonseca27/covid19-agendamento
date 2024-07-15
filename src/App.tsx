@@ -1,28 +1,9 @@
 import React from "react";
 import "./App.css";
-import Appointment from "./routes/Appoitment/Appointment";
-import Query from "./routes/Query/Query";
-import ErrorPage from "./routes/Error404/Error404";
-import Home from "./routes/Home/Home";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ModalProvider } from "./context/ModalContext";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
-
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Home />,
-    errorElement: <ErrorPage />,
-  },
-  {
-    path: "/Agendamento",
-    element: <Appointment />,
-  },
-  {
-    path: "/Consulta",
-    element: <Query />,
-  },
-]);
+import { RouterProvider } from "react-router-dom";
+import { router } from "../src/routes/routes";
 
 const theme = extendTheme({
   colors: {

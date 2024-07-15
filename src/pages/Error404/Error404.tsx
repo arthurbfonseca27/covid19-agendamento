@@ -3,7 +3,7 @@ import Logo from "public/assets/Error.svg";
 import { Button, ButtonGroup } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 
-const Home = () => {
+const ErrorPage = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <div className="flex items-center justify-center">
@@ -20,4 +20,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default ErrorPage;
