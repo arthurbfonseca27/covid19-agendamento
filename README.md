@@ -1,21 +1,27 @@
+
 <h1 align="center">
-  Covid19 Agendamentos Frontend
+  Covid19 Agendamentos Backend
 </h1>
 
 <p align="center">
+<a href="#desktop_computer-sistema">Plataforma</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
   <a href="#memo-requisitos">Requisitos</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
   <a href="#rocket-tecnologias">Tecnologias</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
   <a href="#information_source-como-usar">Como usar</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="#scroll-scripts-disponíveis">Scripts disponíveis</a>
+  <a href="#scroll-scripts-disponíveis">Scripts disponíveis</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+  <a href="#earth_americas-rotas-da-api">Rotas da API</a>
 </p>
+
+## :desktop_computer: Sistema
+![](./public/ScreensFigma.png)
 
 
 ## :memo: Requisitos
 
 | Ferramenta| Versão  | Descrição                                    |
 |-----------|---------|----------------------------------------------|
-| [NodeJS](https://nodejs.org/en/)              | 20.13.1 | Ambiente de execução Javascript server-side  |
-| [NPM](https://www.npmjs.com/)                 | 10.8.1 | Gerenciador de pacotes JS                    |
+| [NodeJS](https://nodejs.org/en/)              | 16.14.0 | Ambiente de execução Javascript server-side  |
+| [NPM](https://www.npmjs.com/)                 | 1.22.17 | Gerenciador de pacotes                   |
 | [Git](https://git-scm.com/)           | | |
 
 
@@ -24,11 +30,9 @@
 Este projeto está sendo desenvolvido com as seguintes tecnologias:
 
 -  Linguagem: [Typescript](https://www.typescriptlang.org/);
--  Biblioteca JS para front-end: [ReactJS](https://reactjs.org/);
--  HTTP client: [Axios](https://github.com/axios/axios);
--  Estilização: [Styled-Components](https://www.styled-components.com/) + [React-Icons](https://react-icons.github.io/react-icons/) + [Chakra UI](https://v2.chakra-ui.com/);
--  Rotas: [react-router-dom v6](https://reactrouter.com/docs/en/v6/getting-started/overview);
--  Padronização:  [Prettier](https://prettier.io/);
+-  Framework: [Express](https://expressjs.com/);
+-  ORM: [Prisma](https://www.prisma.io/);
+-  Padronização: [Prettier](https://prettier.io/);
 
 ## :information_source: Como usar
 
@@ -36,15 +40,22 @@ Este projeto está sendo desenvolvido com as seguintes tecnologias:
 
 ```bash
 # Clonar este repositório
-$ git clone https://github.com/arthurbfonseca27/covid19-appointments-frontend.git
+$ git clone https://github.com/arthurbfonseca27/covid19-appointments-backend.git
 # Ir para o repositório
-$ cd covid19-appointments-frontend
+$ cd covid19-appointments-backend
+# Rodar as migrações
+$ npm prisma migrate dev
 # Instalar as dependências
 $ npm install
 # Rodar a aplicação em ambiente de desenvolvimento
-$ npm start
+$ npm run dev
 ```
 ## :scroll: Scripts disponíveis
 
-- `start`: Inicia a aplicação;
-- `build`: Build da aplicação;
+- `dev`: Inicia a aplicação em ambiente de desenvolvimento;
+
+## :earth_americas: Rotas da API
+- GET `/agendamentos`: API para listar agendamentos;
+- POST `/agendamentos`: API para criar um agendamento;
+- PUT `/agendamentos/:id`: API para atualizar um agendamento;
+- DELETE `/agendamentos/:id`: API para deletar um agendamento;
