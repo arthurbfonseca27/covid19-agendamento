@@ -1,6 +1,6 @@
 
 <h1 align="center">
-  Covid19 Agendamentos Backend
+  Covid19 Agendamentos Frontend
 </h1>
 
 <p align="center">
@@ -42,22 +42,14 @@ Este projeto está sendo desenvolvido com as seguintes tecnologias:
 
 ```bash
 # Clonar este repositório
-$ git clone https://github.com/arthurbfonseca27/covid19-appointments-backend.git
+$ git clone https://github.com/arthurbfonseca27/covid19-appointments-frontend.git
 # Ir para o repositório
-$ cd covid19-appointments-backend
-# Rodar as migrações
-$ npm prisma migrate dev
+$ cd covid19-appointments-frontend
 # Instalar as dependências
 $ npm install
 # Rodar a aplicação em ambiente de desenvolvimento
-$ npm run dev
+$ npm start
 ```
 ## :scroll: Scripts disponíveis
 
-- `dev`: Inicia a aplicação em ambiente de desenvolvimento;
-
-## :earth_americas: Rotas da API
-- GET `/agendamentos`: API para listar agendamentos;
-- POST `/agendamentos`: API para criar um agendamento;
-- PUT `/agendamentos/:id`: API para atualizar um agendamento;
-- DELETE `/agendamentos/:id`: API para deletar um agendamento;
+- `start`: Inicia a aplicação em ambiente de desenvolvimento;
