@@ -1,5 +1,5 @@
 import React from "react";
-import Logo from "public/assets/Error.svg";
+import Logo from "../../assets/Error.svg";
 import { Button, ButtonGroup } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 

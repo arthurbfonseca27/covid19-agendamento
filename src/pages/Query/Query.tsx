@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Logo from "public/assets/Logo-branco.svg";
+import Logo from "../../assets/Logo-branco.svg";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { Divider, Button } from "@chakra-ui/react";
 import DatePicker from "react-datepicker";
