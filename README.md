@@ -15,7 +15,7 @@
 | Ferramenta| Versão  | Descrição                                    |
 |-----------|---------|----------------------------------------------|
 | [NodeJS](https://nodejs.org/en/)              | 20.13.1 | Ambiente de execução Javascript server-side  |
-| [NPM](https://yarnpkg.com/)                 | 10.8.1 | Gerenciador de pacotes JS                    |
+| [NPM](https://www.npmjs.com/)                 | 10.8.1 | Gerenciador de pacotes JS                    |
 | [Git](https://git-scm.com/)           | | |
 
 
