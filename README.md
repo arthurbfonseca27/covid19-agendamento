@@ -32,6 +32,7 @@ Este projeto está sendo desenvolvido com as seguintes tecnologias:
 -  Linguagem: [Typescript](https://www.typescriptlang.org/);
 -  Framework: [Express](https://expressjs.com/);
 -  ORM: [Prisma](https://www.prisma.io/);
+-  Padronização: [Chakra UI](https://v2.chakra-ui.com/) + [Styled-Components](https://www.styled-components.com/) + [React-Icons](https://react-icons.github.io/react-icons/);
 -  Padronização: [Prettier](https://prettier.io/);
 
 ## :information_source: Como usar
