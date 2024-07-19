@@ -75,7 +75,7 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>
-            <div className="w-full justify-center flex items-center flex-col gap-4 text-xl">
+            <div className="w-full text-[#54595E] justify-center flex items-center flex-col gap-4 text-xl">
               {icon}
               {title}
             </div>

@@ -1,9 +1,9 @@
 import React from "react";
-import Logo from "../assets/Erro.svg";
+import Logo from "public/assets/Error.svg";
 import { Button, ButtonGroup } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 
-const Home = () => {
+const ErrorPage = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <div className="flex items-center justify-center">
@@ -12,7 +12,7 @@ const Home = () => {
       <div className="flex font-light flex-row gap-8 justify-center items-center pt-8">
         <Button size="lg" colorScheme="primary" fontWeight="normal">
           <nav>
-            <Link to="/">Voltar para Home</Link>
+            <Link to="/">Voltar para o início</Link>
           </nav>
         </Button>
       </div>
@@ -20,4 +20,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default ErrorPage;

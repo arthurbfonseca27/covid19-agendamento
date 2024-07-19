@@ -1,7 +1,7 @@
 import React from "react";
 import { LiaClipboardListSolid } from "react-icons/lia";
 import { FaSearch } from "react-icons/fa";
-import Logo from "../assets/Logo.svg";
+import Logo from "public/assets/Logo.svg";
 import { Button, ButtonGroup } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 
@@ -14,11 +14,13 @@ const Home = () => {
       <div className="flex flex-row gap-8 justify-center items-center">
         <Button leftIcon={<LiaClipboardListSolid size={20  }/>} size="lg" colorScheme="primary" fontWeight='normal'  width="180px">
           <nav>
-            <Link to="/AgendamentoInicial">Agendar</Link>
+            <Link to="/Agendamento">Agendar</Link>
           </nav>
         </Button>
         <Button leftIcon={<FaSearch />} size="lg" colorScheme="primary" fontWeight='normal'  width="180px">
-          Consultar
+        <nav>
+            <Link to="/Consulta">Consultar</Link>
+          </nav>
         </Button>
       </div>
     </div>
