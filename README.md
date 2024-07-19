@@ -31,9 +31,10 @@
 Este projeto está sendo desenvolvido com as seguintes tecnologias:
 
 -  Linguagem: [Typescript](https://www.typescriptlang.org/);
--  Framework: [Express](https://expressjs.com/);
--  ORM: [Prisma](https://www.prisma.io/);
--  Padronização: [Chakra UI](https://v2.chakra-ui.com/) + [Styled-Components](https://www.styled-components.com/) + [React-Icons](https://react-icons.github.io/react-icons/);
+-  Biblioteca JS para front-end: [ReactJS](https://reactjs.org/);
+-  HTTP client: [Axios](https://github.com/axios/axios);
+-  Estilização: [Styled-Components](https://www.styled-components.com/) + [React-Icons](https://react-icons.github.io/react-icons/) + [Chakra UI](https://v2.chakra-ui.com/);
+-  Rotas: [react-router-dom v6](https://reactrouter.com/docs/en/v6/getting-started/overview);
 -  Padronização: [Prettier](https://prettier.io/);
 
 ## :information_source: Como usar
